@@ -1,47 +1,55 @@
 use api::services::events::JobCalled;
+use color_eyre::Result;
 use gadget_sdk as sdk;
+use sdk::config::StdGadgetConfiguration;
+use sdk::contexts::{ServicesContext, TangleClientContext};
+use sdk::docker::bollard::Docker;
+use sdk::docker::connect_to_docker;
 use sdk::event_listener::tangle::{
     jobs::{services_post_processor, services_pre_processor},
     TangleEventListener,
 };
 use sdk::tangle_subxt::tangle_testnet_runtime::api;
 
-use std::convert::Infallible;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
-#[derive(Clone)]
-pub struct ServiceContext {
-    pub config: sdk::config::StdGadgetConfiguration,
+#[derive(TangleClientContext, ServicesContext)]
+pub struct HyperlaneContext {
+    #[config]
+    pub env: StdGadgetConfiguration,
+    data_dir: PathBuf,
+    connection: Arc<Docker>,
+    container: Mutex<Option<String>>,
 }
 
-/// Returns "Hello World!" if `who` is `None`, otherwise returns "Hello, {who}!"
+const IMAGE: &str = "gcr.io/abacus-labs-dev/hyperlane-agent:main";
+impl HyperlaneContext {
+    pub async fn new(env: StdGadgetConfiguration, data_dir: PathBuf) -> Result<Self> {
+        let connection = connect_to_docker(None).await?;
+        Ok(Self {
+            env,
+            data_dir,
+            connection,
+            container: Mutex::new(None),
+        })
+    }
+}
+
 #[sdk::job(
     id = 0,
-    params(who),
+    params(config_urls, origin_chain_name),
     result(_),
     event_listener(
-        listener = TangleEventListener::<ServiceContext, JobCalled>,
+        listener = TangleEventListener<Arc<HyperlaneContext>, JobCalled>,
         pre_processor = services_pre_processor,
         post_processor = services_post_processor,
     ),
 )]
-pub fn say_hello(who: Option<String>, context: ServiceContext) -> Result<String, Infallible> {
-    match who {
-        Some(who) => Ok(format!("Hello, {who}!")),
-        None => Ok("Hello World!".to_string()),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let config = sdk::config::StdGadgetConfiguration::default();
-        let context = ServiceContext { config };
-        let result = say_hello(None, context.clone()).unwrap();
-        assert_eq!(result, "Hello World!");
-        let result = say_hello(Some("Alice".to_string()), context).unwrap();
-        assert_eq!(result, "Hello, Alice!");
-    }
+pub async fn set_config(
+    ctx: Arc<HyperlaneContext>,
+    config_urls: Option<Vec<String>>,
+    origin_chain_name: String,
+) -> Result<u64> {
+    Ok(0)
 }
