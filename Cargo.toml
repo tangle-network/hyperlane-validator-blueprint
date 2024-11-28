@@ -1,12 +1,12 @@
 [package]
-name = "{{project-name}}"
+name = "hyperlane-relayer-blueprint"
 version = "0.1.0"
 edition = "2021"
-description = "{{project-description}}"
-authors = ["{{authors}}"]
+description = "A Tangle Blueprint (AVS) for deploying Hyperlane validators"
+authors = ["Serial <69764315+Serial-ATA@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
-homepage = "{{project-homepage}}"
-repository = "https://github.com/{{gh-username}}/{{project-name}}"
+homepage = "https://tangle.tools"
+repository = "https://github.com/tangle-network/hyperlane-relayer-blueprint"
 readme = "README.md"
 categories = ["cryptography", "cryptography::cryptocurrencies"]
 keywords = ["tangle", "blueprint", "avs"]
@@ -36,17 +36,17 @@ std = ["gadget-sdk/std"]
 path = "src/lib.rs"
 
 [[bin]]
-name = "{{project-name}}"
+name = "hyperlane-relayer-blueprint"
 path = "src/main.rs"
 
 [package.metadata.blueprint]
 manager = { Evm = "HelloBlueprint" }
 
 [[package.metadata.gadget.Native.sources]]
-owner = "{{gh-username}}"
-repo = "{{project-name}}"
+owner = "tangle-network"
+repo = "hyperlane-relayer-blueprint"
 tag = "0.1.0"
 binaries = [
-    { arch = "Amd64", os = "Linux", name = "amd64-linux-{{project-name}}-gadget" },
-    { arch = "Arm64", os = "Linux", name = "arm64-linux-{{project-name}}-gadget" },
+    { arch = "Amd64", os = "Linux", name = "amd64-linux-hyperlane-relayer-blueprint-gadget" },
+    { arch = "Arm64", os = "Linux", name = "arm64-linux-hyperlane-relayer-blueprint-gadget" },
 ]

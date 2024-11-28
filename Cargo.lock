@@ -4370,20 +4370,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gg"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "blueprint-metadata",
- "color-eyre",
- "gadget-sdk",
- "structopt",
- "tokio",
- "tracing",
- "tracing-subscriber 0.3.18",
-]
-
-[[package]]
 name = "ghash"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4956,6 +4942,20 @@ dependencies = [
  "tokio",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "hyperlane-relayer-blueprint"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "blueprint-metadata",
+ "color-eyre",
+ "gadget-sdk",
+ "structopt",
+ "tokio",
+ "tracing",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]

@@ -1,69 +1,69 @@
-# <h1 align="center"> A Tangle Blueprint 🌐 </h1>
-
-**A simple Hello World Blueprint for Tangle**
-
-## 📚 Prerequisites
-
-Before you can run this project, you will need to have the following software installed on your machine:
-
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Forge](https://getfoundry.sh)
-- [Tangle](https://github.com/tangle-network/tangle?tab=readme-ov-file#-getting-started-)
-
-You will also need to install [cargo-tangle](https://crates.io/crates/cargo-tangle), our CLI tool for creating and
-deploying Tangle Blueprints:
-
-To install the Tangle CLI, run the following command:
-
-> Supported on Linux, MacOS, and Windows (WSL2)
-
-```bash
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/tangle-network/gadget/releases/download/cargo-tangle-v0.1.2/cargo-tangle-installer.sh | sh
-```
-
-Or, if you prefer to install the CLI from crates.io:
-
-```bash
-cargo install cargo-tangle --force # to get the latest version.
-```
-
-## 🚀 Getting Started
-
-Once `cargo-tangle` is installed, you can create a new project with the following command:
-
-```sh
-cargo tangle blueprint create --name <project-name>
-```
-
-and follow the instructions to create a new project.
-
-## 🛠️ Development
-
-Once you have created a new project, you can run the following command to start the project:
-
-```sh
-cargo build
-```
-
-to build the project, and
-
-```sh
-cargo tangle blueprint deploy
-```
-
-to deploy the blueprint to the Tangle network.
+# <h1 align="center"> Hyperlane Validator Blueprint 🌐 </h1>
 
 ## 📚 Overview
 
-This project is about creating a simple Hello World Blueprint for Tangle and EigenLayer.
-Blueprints are specifications for <abbr title="Actively Validated Services">AVS</abbr>s on the Tangle Network. An AVS is
-an off-chain service that runs arbitrary computations for a user-specified period of time.
+This blueprint contains tasks for an operator to initialize and manage their
+own [Hyperlane validator](https://docs.hyperlane.xyz/docs/operate/overview-agents#validators).
 
-Blueprints provide a useful abstraction, allowing developers to create reusable service infrastructures as if they were
-smart contracts. This enables developers to monetize their work and align long-term incentives with the success of their
-creations, benefiting proportionally to their Blueprint's usage.
+## 🚀 Features
 
-For more details, please refer to the [project documentation](https://docs.tangle.tools/developers/blueprints).
+This Blueprint provides the following key feature:
+
+* Automated devops for running Hyperlane validators
+* Tangle Network integration for on-demand instancing of validators
+
+## 📋 Pre-requisites
+
+* [Docker](https://docs.docker.com/engine/install/)
+* [cargo-tangle](https://crates.io/crates/cargo-tangle)
+
+## 💻 Usage
+
+To use this blueprint:
+
+1. Review the blueprint specifications in the `src/` directory.
+2. Follow the [Hyperlane documentation](https://docs.hyperlane.xyz/docs/operate/validators/run-validators) to understand the
+   validator setup process.
+3. Adapt the blueprint to your specific validator configuration needs.
+4. Deploy the blueprint on the Tangle Network using the Tangle CLI:
+
+```shell
+$ cargo tangle blueprint deploy
+```
+
+Upon deployment, the Blueprint will be able to be instanced and executed by any Tangle operator registered on the
+blueprint.
+
+### Starting a validator
+
+There are two ways to start a validator:
+
+1. With user-generated configs, and optional origin chain
+2. With the [default configs](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/main/config), and
+   specified origin chain
+
+Once you've determined which path to choose, you can call the `set_config` job.
+
+#### Set config job
+
+To spin up a validator instance, use the `set_config` job:
+
+This job will save the existing config, attempt to start the validator with the new config(s), and on failure will spin back
+up using the old config.
+
+It has two parameters:
+
+1. `config_urls`: Optional config file URLs, if not specified it will use
+   the [defaults](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/main/config).
+2. `origin_chain_name`: The name of the chain being validated
+
+**NOTE: Ensure that when using a manually specified config, `originChainName` is specified, either as a job parameter or in
+the config itself**
+
+## 🔗 External Links
+
+- [Hyperlane Documentation](https://docs.hyperlane.xyz)
+- [Tangle Network](https://www.tangle.tools/)
 
 ## 📜 License
 
@@ -79,8 +79,8 @@ at your option.
 ## 📬 Feedback and Contributions
 
 We welcome feedback and contributions to improve this blueprint.
-Please open an issue or submit a pull request on
-our [GitHub repository](https://github.com/tangle-network/blueprint-template/issues).
+Please open an issue or submit a pull request on our GitHub repository.
+Please let us know if you fork this blueprint and extend it too!
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be

@@ -1,5 +1,5 @@
 use color_eyre::Result;
-use {{project-name | snake_case}} as blueprint;
+use hyperlane_relayer_blueprint as blueprint;
 use gadget_sdk as sdk;
 use sdk::runners::tangle::TangleConfig;
 use sdk::runners::BlueprintRunner;
