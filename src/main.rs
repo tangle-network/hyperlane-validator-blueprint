@@ -1,6 +1,6 @@
 use color_eyre::Result;
-use hyperlane_relayer_blueprint as blueprint;
 use gadget_sdk as sdk;
+use hyperlane_relayer_blueprint as blueprint;
 use sdk::runners::tangle::TangleConfig;
 use sdk::runners::BlueprintRunner;
 
