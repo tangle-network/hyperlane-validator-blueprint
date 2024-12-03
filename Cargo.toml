@@ -15,6 +15,9 @@ rust-version = "1.81"
 [dependencies]
 tracing = "0.1"
 color-eyre = "0.6"
+hex = "0.4.3"
+tokio = "1.41.0"
+reqwest = "0.12.8"
 
 [dependencies.gadget-sdk]
 #version = "0.5.1"
@@ -23,7 +26,14 @@ default-features = false
 features = ["getrandom"]
 
 [build-dependencies]
-blueprint-metadata = "0.1.6"
+blueprint-metadata = "0.2.0"
+
+[dev-dependencies]
+blueprint-test-utils = "0.2.0"
+cargo-tangle = "0.3.0"
+tempfile = "3.10.0"
+testcontainers = "0.23.1"
+tracing-subscriber = "0.3.18"
 
 [features]
 default = ["std"]
@@ -38,12 +48,3 @@ path = "src/main.rs"
 
 [package.metadata.blueprint]
 manager = { Evm = "HelloBlueprint" }
-
-[[package.metadata.gadget.Native.sources]]
-owner = "tangle-network"
-repo = "hyperlane-relayer-blueprint"
-tag = "0.1.0"
-binaries = [
-    { arch = "Amd64", os = "Linux", name = "amd64-linux-hyperlane-relayer-blueprint-gadget" },
-    { arch = "Arm64", os = "Linux", name = "arm64-linux-hyperlane-relayer-blueprint-gadget" },
-]
