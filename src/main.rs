@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         std::fs::create_dir_all(&data_dir)?;
     }
 
-    let ctx = Arc::new(blueprint::HyperlaneContext::new(env.clone(), data_dir).await?);
+    let ctx = blueprint::HyperlaneContext::new(env.clone(), data_dir).await?;
 
     let set_config = blueprint::SetConfigEventHandler::new(&env, ctx).await?;
 
