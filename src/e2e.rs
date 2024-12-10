@@ -8,7 +8,6 @@ use sdk::ext::tangle_subxt::tangle_testnet_runtime::api::services::calls::types:
 use blueprint_test_utils::test_ext::*;
 use blueprint_test_utils::*;
 use blueprint_test_utils::eigenlayer_test_env::start_anvil_testnet;
-use cargo_tangle::deploy::Opts;
 use sdk::error;
 use sdk::info;
 use sdk::docker::{bollard, connect_to_docker};
@@ -43,6 +42,10 @@ fn setup_temp_dir(
 
     let tempdir = tempfile::tempdir().unwrap();
 
+    // Create the signatures directory
+    let signatures_path = tempdir.path().join("signatures-testnet1");
+    std::fs::create_dir_all(&signatures_path).unwrap();
+
     // Create the registry
     let registry_path = tempdir.path().join("chains");
     std::fs::create_dir(&registry_path).unwrap();
@@ -64,13 +67,13 @@ fn setup_temp_dir(
             testnet_path.join("metadata.yaml"),
             testnet1_metadata.replace("{RPC_URL}", &rpc_url),
         )
-            .unwrap();
+        .unwrap();
     }
 
-    // Create the core config
-    let configs_dir = tempdir.path().join("configs");
-    std::fs::create_dir(&configs_dir).unwrap();
-    std::fs::copy(CORE_CONFIG_PATH, configs_dir.join("core-config.yaml")).unwrap();
+    // // Create the core config
+    // let configs_dir = tempdir.path().join("configs");
+    // std::fs::create_dir(&configs_dir).unwrap();
+    // std::fs::copy(CORE_CONFIG_PATH, configs_dir.join("core-config.yaml")).unwrap();
 
     // Create agent config
     let agent_config_template = std::fs::read_to_string(AGENT_CONFIG_TEMPLATE_PATH).unwrap();
@@ -78,9 +81,10 @@ fn setup_temp_dir(
         tempdir.path().join("agent-config.json"),
         agent_config_template
             .replace("{TESTNET_1_RPC}", &testnet1_docker_rpc_url)
-            .replace("{TESTNET_2_RPC}", &testnet2_docker_rpc_url),
+            .replace("{TESTNET_2_RPC}", &testnet2_docker_rpc_url)
+            .replace("{TMP_SYNCER_DIR}", &signatures_path.to_string_lossy()),
     )
-        .unwrap();
+    .unwrap();
 
     tempdir
 }
@@ -99,7 +103,7 @@ async fn spinup_anvil_testnets() -> (
     let connection = connect_to_docker(None).await.unwrap();
     if let Err(e) = connection
         .create_network(CreateNetworkOptions {
-            name: "hyperlane_relayer_test_net",
+            name: "hyperlane_validator_test_net",
             ..Default::default()
         })
         .await
@@ -114,7 +118,7 @@ async fn spinup_anvil_testnets() -> (
 
     connection
         .connect_network(
-            "hyperlane_relayer_test_net",
+            "hyperlane_validator_test_net",
             ConnectNetworkOptions {
                 container: origin_container.id(),
                 ..Default::default()
@@ -125,7 +129,7 @@ async fn spinup_anvil_testnets() -> (
 
     connection
         .connect_network(
-            "hyperlane_relayer_test_net",
+            "hyperlane_validator_test_net",
             ConnectNetworkOptions {
                 container: dest_container.id(),
                 ..Default::default()
@@ -142,7 +146,7 @@ async fn spinup_anvil_testnets() -> (
         .network_settings
         .unwrap()
         .networks
-        .unwrap()["hyperlane_relayer_test_net"]
+        .unwrap()["hyperlane_validator_test_net"]
         .clone();
 
     let dest_container_inspect = connection
@@ -153,7 +157,7 @@ async fn spinup_anvil_testnets() -> (
         .network_settings
         .unwrap()
         .networks
-        .unwrap()["hyperlane_relayer_test_net"]
+        .unwrap()["hyperlane_validator_test_net"]
         .clone();
 
     (
@@ -200,26 +204,9 @@ async fn validator() {
     );
     let temp_dir_path = tempdir.path();
 
-    let tangle = tangle::run().unwrap();
-    let base_path = std::env::current_dir().expect("Failed to get current directory");
-    let base_path = base_path
-        .canonicalize()
-        .expect("File could not be normalized");
-
-    let manifest_path = base_path.join("Cargo.toml");
-
-    let opts = Opts {
-        pkg_name: option_env!("CARGO_BIN_NAME").map(ToOwned::to_owned),
-        http_rpc_url: format!("http://127.0.0.1:{}", tangle.ws_port()),
-        ws_rpc_url: format!("ws://127.0.0.1:{}", tangle.ws_port()),
-        manifest_path,
-        signer: None,
-        signer_evm: None,
-    };
-
     const N: usize = 1;
 
-    new_test_ext_blueprint_manager::<N, 1, _, _, _>("", opts, run_test_blueprint_manager)
+    new_test_ext_blueprint_manager::<N, 1, _, _, _>("", run_test_blueprint_manager)
         .await
         .execute_with_async(move |client, handles, svcs| async move {
             // At this point, blueprint has been deployed, every node has registered
@@ -255,7 +242,7 @@ async fn validator() {
                 0,
                 Args::from([config_urls, origin_chain_name]),
             )
-                .await
+            .await
             {
                 error!("Failed to submit job: {err}");
                 panic!("Failed to submit job: {err}");
@@ -271,7 +258,7 @@ async fn validator() {
             assert_eq!(job_results.call_id, call_id);
             assert_eq!(job_results.result[0], Field::Uint64(0));
 
-            // The relayer is now running, send a message
+            // The validator is now running, send a self-relayed message
             std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
             let send_msg_output = Command::new("hyperlane")
                 .args([
@@ -279,6 +266,7 @@ async fn validator() {
                     "message",
                     "--registry",
                     ".",
+                    "--relay",
                     "--origin",
                     "testnet1",
                     "--destination",
@@ -293,10 +281,12 @@ async fn validator() {
                 .expect("Failed to run command");
 
             if !send_msg_output.status.success() {
-                panic!(
+                dbg!(String::from_utf8_lossy(&send_msg_output.stdout));
+                dbg!(
                     "Failed to send test message: {}",
                     String::from_utf8_lossy(&send_msg_output.stderr)
                 );
+                loop {}
             }
 
             let stdout = String::from_utf8_lossy(&send_msg_output.stdout);
@@ -367,7 +357,7 @@ async fn validator() {
     let connection = connect_to_docker(None).await.unwrap();
     let network = connection
         .inspect_network(
-            "hyperlane_relayer_test_net",
+            "hyperlane_validator_test_net",
             None::<InspectNetworkOptions<String>>,
         )
         .await
@@ -386,7 +376,7 @@ async fn validator() {
     }
 
     connection
-        .remove_network("hyperlane_relayer_test_net")
+        .remove_network("hyperlane_validator_test_net")
         .await
         .unwrap();
 }

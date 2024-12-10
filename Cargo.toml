@@ -21,7 +21,8 @@ reqwest = "0.12.8"
 
 [dependencies.gadget-sdk]
 #version = "0.5.1"
-git = "https://github.com/tangle-network/gadget.git"
+#git = "https://github.com/tangle-network/gadget.git"
+path = "../gadget/sdk"
 default-features = false
 features = ["getrandom"]
 
@@ -29,8 +30,10 @@ features = ["getrandom"]
 blueprint-metadata = "0.2.0"
 
 [dev-dependencies]
-blueprint-test-utils = "0.2.0"
-cargo-tangle = "0.3.0"
+#blueprint-test-utils = "0.2.0"
+blueprint-test-utils = { path = "../gadget/blueprint-test-utils" }
+# cargo-tangle = "0.3.0"
+cargo-tangle = { path = "../gadget/cli" }
 tempfile = "3.10.0"
 testcontainers = "0.23.1"
 tracing-subscriber = "0.3.18"
@@ -47,4 +50,4 @@ name = "hyperlane-relayer-blueprint"
 path = "src/main.rs"
 
 [package.metadata.blueprint]
-manager = { Evm = "HelloBlueprint" }
+manager = { Evm = "HyperlaneRelayerBlueprint" }

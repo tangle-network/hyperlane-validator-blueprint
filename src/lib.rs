@@ -6,16 +6,16 @@ use color_eyre::Result;
 use gadget_sdk as sdk;
 use sdk::config::StdGadgetConfiguration;
 use sdk::contexts::{ServicesContext, TangleClientContext};
+use sdk::docker::bollard::network::ConnectNetworkOptions;
 use sdk::docker::bollard::Docker;
 use sdk::docker::connect_to_docker;
+use sdk::docker::Container;
 use sdk::event_listener::tangle::{
     jobs::{services_post_processor, services_pre_processor},
     TangleEventListener,
 };
-use sdk::tangle_subxt::tangle_testnet_runtime::api;
-use sdk::docker::bollard::network::ConnectNetworkOptions;
-use sdk::docker::Container;
 use sdk::keystore::BackendExt;
+use sdk::tangle_subxt::tangle_testnet_runtime::api;
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -115,7 +115,7 @@ impl HyperlaneContext {
             .cmd([
                 "./validator",
                 "--db /hyperlane_db",
-                "--defaultSigner.key",
+                "--validator.key",
                 &format!("0x{secret}"),
             ])
             .create()
@@ -153,6 +153,7 @@ impl HyperlaneContext {
     async fn revert_configs(&self) -> Result<()> {
         tracing::error!("Container failed to start with new configs, reverting");
 
+        panic!();
         self.remove_existing_container().await?;
 
         let original_configs_path = self.original_agent_configs_path();
@@ -261,6 +262,11 @@ pub async fn set_config(
     if configs_path.exists() {
         let orig_configs_path = ctx.original_agent_configs_path();
         tracing::info!("Configs path exists, backing up.");
+        if orig_configs_path.exists() {
+            tracing::warn!("Removing old backup at {}", orig_configs_path.display());
+            std::fs::remove_dir_all(&orig_configs_path)?;
+        }
+
         std::fs::rename(&configs_path, orig_configs_path)?;
         std::fs::create_dir_all(&configs_path)?;
     }
@@ -268,6 +274,11 @@ pub async fn set_config(
     let origin_chain_name_path = ctx.origin_chain_name_path();
     if origin_chain_name_path.exists() {
         let orig_origin_chain_name_path = ctx.original_origin_chain_name_path();
+        if orig_origin_chain_name_path.exists() {
+            tracing::warn!("Removing old backup at {}", orig_origin_chain_name_path.display());
+            std::fs::remove_file(&orig_origin_chain_name_path)?;
+        }
+
         tracing::info!("Origin chain exists, backing up.");
         std::fs::rename(&origin_chain_name_path, orig_origin_chain_name_path)?;
     }
@@ -284,7 +295,10 @@ pub async fn set_config(
     }
 
     std::fs::write(&origin_chain_name_path, origin_chain_name)?;
-    tracing::info!("Origin chain written to: {}", origin_chain_name_path.display());
+    tracing::info!(
+        "Origin chain written to: {}",
+        origin_chain_name_path.display()
+    );
 
     if let Err(e) = ctx.spinup_container().await {
         // Something went wrong spinning up the container, possibly bad config. Try to revert.
