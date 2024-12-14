@@ -32,7 +32,6 @@ pub fn setup_testing_log() {
 }
 
 const AGENT_CONFIG_TEMPLATE_PATH: &str = "./test_assets/agent-config.json.template";
-const CORE_CONFIG_PATH: &str = "./test_assets/core-config.yaml";
 const TEST_ASSETS_PATH: &str = "./test_assets";
 
 fn setup_temp_dir(
