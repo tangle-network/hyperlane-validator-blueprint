@@ -4,7 +4,6 @@ use hyperlane_validator_blueprint as blueprint;
 use sdk::runners::tangle::TangleConfig;
 use sdk::runners::BlueprintRunner;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 fn default_data_dir() -> PathBuf {
     const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
@@ -15,14 +14,13 @@ fn default_data_dir() -> PathBuf {
 async fn main() -> Result<()> {
     color_eyre::install()?;
 
-    let data_dir;
-    match env.data_dir.clone() {
-        Some(dir) => data_dir = dir,
+    let data_dir = match env.data_dir.clone() {
+        Some(dir) => dir,
         None => {
             tracing::warn!("Data dir not specified, using default");
-            data_dir = default_data_dir();
+            default_data_dir()
         }
-    }
+    };
 
     if !data_dir.exists() {
         tracing::warn!("Data dir does not exist, creating");

@@ -5794,7 +5794,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hyperlane-relayer-blueprint"
+name = "hyperlane-validator-blueprint"
 version = "0.1.0"
 dependencies = [
  "blueprint-metadata",
