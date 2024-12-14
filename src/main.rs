@@ -1,6 +1,6 @@
 use color_eyre::Result;
 use gadget_sdk as sdk;
-use hyperlane_relayer_blueprint as blueprint;
+use hyperlane_validator_blueprint as blueprint;
 use sdk::runners::tangle::TangleConfig;
 use sdk::runners::BlueprintRunner;
 use std::path::{Path, PathBuf};

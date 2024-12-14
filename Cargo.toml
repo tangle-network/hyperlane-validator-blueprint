@@ -1,12 +1,12 @@
 [package]
-name = "hyperlane-relayer-blueprint"
+name = "hyperlane-validator-blueprint"
 version = "0.1.0"
 edition = "2021"
 description = "A Tangle Blueprint (AVS) for deploying Hyperlane validators"
 authors = ["Serial <69764315+Serial-ATA@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
 homepage = "https://tangle.tools"
-repository = "https://github.com/tangle-network/hyperlane-relayer-blueprint"
+repository = "https://github.com/tangle-network/hyperlane-validator-blueprint"
 readme = "README.md"
 categories = ["cryptography", "cryptography::cryptocurrencies"]
 keywords = ["tangle", "blueprint", "avs"]

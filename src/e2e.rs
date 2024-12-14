@@ -173,7 +173,7 @@ async fn validator() {
     let ((origin_container, origin_container_ip), (dest_container, dest_container_ip)) =
         spinup_anvil_testnets().await;
 
-    // The relayer itself uses the IPs internal to the Docker network.
+    // The validator itself uses the IPs internal to the Docker network.
     // When it comes time to relay the message, the command is run outside the Docker network,
     // so we need to get both addresses.
     //
