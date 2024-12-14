@@ -203,149 +203,153 @@ async fn validator() {
 
     const N: usize = 1;
 
-    new_test_ext_blueprint_manager::<N, 1, _, _, _>("", run_test_blueprint_manager, NodeConfig::new(false))
-        .await
-        .execute_with_async(move |client, handles, svcs, _| async move {
-            // At this point, blueprint has been deployed, every node has registered
-            // as an operator for the relevant services, and, all gadgets are running
+    new_test_ext_blueprint_manager::<N, 1, _, _, _>(
+        "",
+        run_test_blueprint_manager,
+        NodeConfig::new(false),
+    )
+    .await
+    .execute_with_async(move |client, handles, svcs, _| async move {
+        // At this point, blueprint has been deployed, every node has registered
+        // as an operator for the relevant services, and, all gadgets are running
 
-            let keypair = handles[0].sr25519_id().clone();
+        let keypair = handles[0].sr25519_id().clone();
 
-            let service = svcs.services.last().unwrap();
+        let service = svcs.services.last().unwrap();
 
-            let service_id = service.id;
-            let call_id = get_next_call_id(client)
-                .await
-                .expect("Failed to get next job id")
-                .saturating_sub(1);
-            info!("Submitting job with params service ID: {service_id}, call ID: {call_id}");
-
-            // Pass the arguments
-            let agent_config_path =
-                std::path::absolute(temp_dir_path.join("agent-config.json")).unwrap();
-            let config_urls = Field::List(BoundedVec(vec![Field::String(BoundedString(
-                BoundedVec(format!("file://{}", agent_config_path.display()).into_bytes()),
-            ))]));
-            let origin_chain_name = Field::String(BoundedString(BoundedVec(
-                String::from("testnet1").into_bytes(),
-            )));
-
-            // Next step: submit a job under that service/job id
-            if let Err(err) = submit_job(
-                client,
-                &keypair,
-                service_id,
-                0,
-                Args::from([config_urls, origin_chain_name]),
-                call_id
-            )
+        let service_id = service.id;
+        let call_id = get_next_call_id(client)
             .await
-            {
-                error!("Failed to submit job: {err}");
-                panic!("Failed to submit job: {err}");
-            }
+            .expect("Failed to get next job id")
+            .saturating_sub(1);
+        info!("Submitting job with params service ID: {service_id}, call ID: {call_id}");
 
-            // Step 2: wait for the job to complete
-            let job_results = wait_for_completion_of_tangle_job(client, service_id, call_id, N)
-                .await
-                .expect("Failed to wait for job completion");
+        // Pass the arguments
+        let agent_config_path =
+            std::path::absolute(temp_dir_path.join("agent-config.json")).unwrap();
+        let config_urls = Field::List(BoundedVec(vec![Field::String(BoundedString(BoundedVec(
+            format!("file://{}", agent_config_path.display()).into_bytes(),
+        )))]));
+        let origin_chain_name = Field::String(BoundedString(BoundedVec(
+            String::from("testnet1").into_bytes(),
+        )));
 
-            // Step 3: Get the job results, compare to expected value(s)
-            assert_eq!(job_results.service_id, service_id);
-            assert_eq!(job_results.call_id, call_id);
-            assert_eq!(job_results.result[0], Field::Uint64(0));
+        // Next step: submit a job under that service/job id
+        if let Err(err) = submit_job(
+            client,
+            &keypair,
+            service_id,
+            0,
+            Args::from([config_urls, origin_chain_name]),
+            call_id,
+        )
+        .await
+        {
+            error!("Failed to submit job: {err}");
+            panic!("Failed to submit job: {err}");
+        }
 
-            // The validator is now running, send a self-relayed message
-            std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
-            let send_msg_output = Command::new("hyperlane")
-                .args([
-                    "send",
-                    "message",
-                    "--registry",
-                    ".",
-                    "--relay",
-                    "--origin",
-                    "testnet1",
-                    "--destination",
-                    "testnet2",
-                    "--quick",
-                ])
-                .env(
-                    "HYP_KEY",
-                    "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
-                )
-                .output()
-                .expect("Failed to run command");
+        // Step 2: wait for the job to complete
+        let job_results = wait_for_completion_of_tangle_job(client, service_id, call_id, N)
+            .await
+            .expect("Failed to wait for job completion");
 
-            if !send_msg_output.status.success() {
-                dbg!(String::from_utf8_lossy(&send_msg_output.stdout));
-                dbg!(
-                    "Failed to send test message: {}",
-                    String::from_utf8_lossy(&send_msg_output.stderr)
-                );
-                loop {}
-            }
+        // Step 3: Get the job results, compare to expected value(s)
+        assert_eq!(job_results.service_id, service_id);
+        assert_eq!(job_results.call_id, call_id);
+        assert_eq!(job_results.result[0], Field::Uint64(0));
 
-            let stdout = String::from_utf8_lossy(&send_msg_output.stdout);
+        // The validator is now running, send a self-relayed message
+        std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
+        let send_msg_output = Command::new("hyperlane")
+            .args([
+                "send",
+                "message",
+                "--registry",
+                ".",
+                "--relay",
+                "--origin",
+                "testnet1",
+                "--destination",
+                "testnet2",
+                "--quick",
+            ])
+            .env(
+                "HYP_KEY",
+                "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+            )
+            .output()
+            .expect("Failed to run command");
 
-            let mut msg_id = None;
-            for line in String::from_utf8_lossy(&send_msg_output.stdout).lines() {
-                let Some(id) = line.strip_prefix("Message ID: ") else {
-                    continue;
-                };
+        if !send_msg_output.status.success() {
+            dbg!(String::from_utf8_lossy(&send_msg_output.stdout));
+            dbg!(
+                "Failed to send test message: {}",
+                String::from_utf8_lossy(&send_msg_output.stderr)
+            );
+            loop {}
+        }
 
-                msg_id = Some(id.to_string());
-                break;
-            }
+        let stdout = String::from_utf8_lossy(&send_msg_output.stdout);
 
-            let Some(msg_id) = msg_id else {
-                panic!("No message ID found in output: {stdout}")
+        let mut msg_id = None;
+        for line in String::from_utf8_lossy(&send_msg_output.stdout).lines() {
+            let Some(id) = line.strip_prefix("Message ID: ") else {
+                continue;
             };
 
-            tracing::info!("Message ID: {msg_id}");
+            msg_id = Some(id.to_string());
+            break;
+        }
 
-            // Give the command a few seconds
-            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+        let Some(msg_id) = msg_id else {
+            panic!("No message ID found in output: {stdout}")
+        };
 
-            tracing::info!("Mining a block");
-            Command::new("cast")
-                .args([
-                    "rpc",
-                    "anvil_mine",
-                    "1",
-                    "--rpc-url",
-                    &*testnet1_host_rpc_url,
-                ])
-                .output()
-                .unwrap();
+        tracing::info!("Message ID: {msg_id}");
 
-            // Give the command a few seconds
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        // Give the command a few seconds
+        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
 
-            let msg_status_output = Command::new("hyperlane")
-                .args([
-                    "status",
-                    "--registry",
-                    ".",
-                    "--origin",
-                    "testnet1",
-                    "--destination",
-                    "testnet2",
-                    "--id",
-                    &*msg_id,
-                ])
-                .env(
-                    "HYP_KEY",
-                    "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
-                )
-                .output()
-                .expect("Failed to run command");
+        tracing::info!("Mining a block");
+        Command::new("cast")
+            .args([
+                "rpc",
+                "anvil_mine",
+                "1",
+                "--rpc-url",
+                &*testnet1_host_rpc_url,
+            ])
+            .output()
+            .unwrap();
 
-            assert!(msg_status_output.status.success());
-            assert!(String::from_utf8_lossy(&msg_status_output.stdout)
-                .contains(&format!("Message {msg_id} was delivered")));
-        })
-        .await;
+        // Give the command a few seconds
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+        let msg_status_output = Command::new("hyperlane")
+            .args([
+                "status",
+                "--registry",
+                ".",
+                "--origin",
+                "testnet1",
+                "--destination",
+                "testnet2",
+                "--id",
+                &*msg_id,
+            ])
+            .env(
+                "HYP_KEY",
+                "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+            )
+            .output()
+            .expect("Failed to run command");
+
+        assert!(msg_status_output.status.success());
+        assert!(String::from_utf8_lossy(&msg_status_output.stdout)
+            .contains(&format!("Message {msg_id} was delivered")));
+    })
+    .await;
 
     drop(origin_container);
     drop(dest_container);

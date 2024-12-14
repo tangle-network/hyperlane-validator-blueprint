@@ -277,7 +277,10 @@ pub async fn set_config(
     if origin_chain_name_path.exists() {
         let orig_origin_chain_name_path = ctx.original_origin_chain_name_path();
         if orig_origin_chain_name_path.exists() {
-            tracing::warn!("Removing old backup at {}", orig_origin_chain_name_path.display());
+            tracing::warn!(
+                "Removing old backup at {}",
+                orig_origin_chain_name_path.display()
+            );
             std::fs::remove_file(&orig_origin_chain_name_path)?;
         }
 
