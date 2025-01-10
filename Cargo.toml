@@ -16,7 +16,7 @@ rust-version = "1.81"
 tracing = "0.1"
 color-eyre = "0.6"
 hex = "0.4.3"
-tokio = "1.41.0"
+tokio = "1.43.0"
 reqwest = "0.12.8"
 
 [dependencies.gadget-sdk]
