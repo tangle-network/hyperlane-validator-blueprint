@@ -1,16 +1,10 @@
 use color_eyre::Result;
-use gadget_sdk as sdk;
 use hyperlane_validator_blueprint as blueprint;
-use sdk::runners::tangle::TangleConfig;
-use sdk::runners::BlueprintRunner;
-use std::path::{Path, PathBuf};
+use sdk::gadget_runners::core::runner::BlueprintRunner;
+use sdk::gadget_runners::tangle::tangle::TangleConfig;
+use tangle_blueprint_sdk as sdk;
 
-fn default_data_dir() -> PathBuf {
-    const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
-    Path::new(MANIFEST_DIR).join("data")
-}
-
-#[sdk::main(env)]
+#[sdk::gadget_macros::main(env)]
 async fn main() -> Result<()> {
     color_eyre::install()?;
 
@@ -18,7 +12,7 @@ async fn main() -> Result<()> {
         Some(dir) => dir,
         None => {
             tracing::warn!("Data dir not specified, using default");
-            default_data_dir()
+            blueprint::default_data_dir()
         }
     };
 
