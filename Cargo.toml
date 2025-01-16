@@ -1,9 +1,7 @@
-cargo-features = ["edition2024"]
-
 [package]
 name = "hyperlane-validator-blueprint"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 description = "A Tangle Blueprint (AVS) for deploying Hyperlane validators"
 authors = ["Serial <69764315+Serial-ATA@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
@@ -12,16 +10,15 @@ repository = "https://github.com/tangle-network/hyperlane-validator-blueprint"
 readme = "README.md"
 categories = ["cryptography", "cryptography::cryptocurrencies"]
 keywords = ["tangle", "blueprint", "avs"]
-rust-version = "1.85"
 
 [dependencies]
 tracing = "0.1"
 color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.43.0"
-reqwest = "0.12.8"
+reqwest = "0.12.12"
 gadget-macros = { path = "../gadget-workspace/crates/macros" }
-dockworker = { path = "../dockworker", features = ["docker"] }
+dockworker = { git = "https://github.com/tangle-network/dockworker", features = ["docker"] }
 bollard = "0.17"
 
 [dependencies.tangle-blueprint-sdk]
