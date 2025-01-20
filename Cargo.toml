@@ -18,13 +18,13 @@ hex = "0.4.3"
 tokio = "1.43.0"
 reqwest = "0.12.12"
 gadget-macros = { path = "../gadget-workspace/crates/macros" }
-dockworker = { git = "https://github.com/tangle-network/dockworker", features = ["docker"] }
+dockworker = { git = "https://github.com/tangle-network/dockworker", branch = "serial/cleanup", features = ["docker"] }
 bollard = "0.17"
 
-[dependencies.tangle-blueprint-sdk]
+[dependencies.blueprint-sdk]
 #git = "https://github.com/tangle-network/gadget-workspace.git"
-path = "../gadget-workspace/crates/sdk/tangle"
-features = ["std"]
+path = "../gadget-workspace/crates/sdk"
+features = ["std", "tangle"]
 
 [build-dependencies]
 blueprint-metadata = "0.2.1"

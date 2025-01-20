@@ -1,27 +1,27 @@
 #[cfg(test)]
 mod e2e;
 
+use blueprint_sdk as sdk;
 use color_eyre::Result;
-use tangle_blueprint_sdk as sdk;
 
 use bollard::network::ConnectNetworkOptions;
 use color_eyre::eyre::eyre;
-use dockworker::DockerBuilder;
 use dockworker::container::Container;
+use dockworker::DockerBuilder;
 use gadget_macros::ext::keystore::backends::Backend;
-use sdk::gadget_config::GadgetConfiguration;
-use sdk::gadget_event_listeners::tangle::events::TangleEventListener;
-use sdk::gadget_event_listeners::tangle::services::{
+use sdk::config::GadgetConfiguration;
+use sdk::tangle::crypto::sp_core::SpEcdsa;
+use sdk::tangle::crypto_tangle_pair_signer::TanglePairSigner;
+use sdk::tangle::event_listeners::tangle::events::TangleEventListener;
+use sdk::tangle::event_listeners::tangle::services::{
     services_post_processor, services_pre_processor,
 };
-use sdk::gadget_macros::contexts::{ServicesContext, TangleClientContext};
-use sdk::gadget_macros::ext::contexts::keystore::KeystoreContext;
-use sdk::gadget_macros::ext::tangle::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
+use sdk::tangle::macros::contexts::{ServicesContext, TangleClientContext};
+use sdk::tangle::macros::ext::contexts::keystore::KeystoreContext;
+use sdk::tangle::macros::ext::tangle::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
-use tangle_blueprint_sdk::gadget_crypto::sp_core::SpEcdsa;
-use tangle_blueprint_sdk::gadget_crypto_tangle_pair_signer::TanglePairSigner;
 use tokio::sync::Mutex;
 
 pub fn default_data_dir() -> PathBuf {
@@ -137,10 +137,13 @@ impl HyperlaneContext {
             let id = container.id().unwrap();
             self.connection
                 .get_client()
-                .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
-                    container: id,
-                    ..Default::default()
-                })
+                .connect_network(
+                    "hyperlane_validator_test_net",
+                    ConnectNetworkOptions {
+                        container: id,
+                        ..Default::default()
+                    },
+                )
                 .await?;
         }
 
@@ -229,7 +232,7 @@ impl HyperlaneContext {
     }
 }
 
-#[sdk::gadget_macros::job(
+#[sdk::tangle::macros::job(
     id = 0,
     params(config_urls, origin_chain_name),
     result(_),
@@ -257,7 +260,7 @@ pub async fn set_config(
             configs.push(reqwest::get(config_url).await?.text().await?);
         }
     }
-    
+
     // TODO: First step, verify the config is valid. Is there an easy way to do so?
     if origin_chain_name.is_empty() {
         return Err(eyre!(

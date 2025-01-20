@@ -2229,6 +2229,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "blueprint-build-utils"
+version = "0.1.0"
+dependencies = [
+ "gadget-std",
+]
+
+[[package]]
+name = "blueprint-metadata"
+version = "0.2.1"
+dependencies = [
+ "cargo_metadata 0.18.1",
+ "fs2",
+ "gadget-blueprint-proc-macro-core 0.3.1",
+ "gadget-std",
+ "rustdoc-types",
+ "serde",
+ "serde_json",
+ "typed-builder",
+]
+
+[[package]]
 name = "blueprint-metadata"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2241,6 +2262,25 @@ dependencies = [
  "serde",
  "serde_json",
  "typed-builder",
+]
+
+[[package]]
+name = "blueprint-sdk"
+version = "0.1.0"
+dependencies = [
+ "blueprint-build-utils",
+ "blueprint-metadata 0.2.1",
+ "gadget-client-networking",
+ "gadget-client-tangle",
+ "gadget-clients",
+ "gadget-config",
+ "gadget-contexts",
+ "gadget-keystore",
+ "gadget-networking",
+ "gadget-testing-utils",
+ "sp-core",
+ "tangle-blueprint-sdk",
+ "tokio",
 ]
 
 [[package]]
@@ -4229,10 +4269,11 @@ dependencies = [
 [[package]]
 name = "dockworker"
 version = "0.1.0"
-source = "git+https://github.com/tangle-network/dockworker#989c878e1bc58ba1e6b961abcac20e2d830a8994"
+source = "git+https://github.com/tangle-network/dockworker?branch=serial%2Fcleanup#a5efdd3b9bb92ed34d95bbd15143fc4a6fec58ed"
 dependencies = [
  "async-trait",
  "bollard",
+ "cfg-if",
  "futures",
  "futures-util",
  "ipnet",
@@ -6050,6 +6091,7 @@ dependencies = [
  "gadget-keystore",
  "gadget-networking",
  "gadget-std",
+ "proc-macro2",
  "subxt",
 ]
 
@@ -7413,7 +7455,8 @@ dependencies = [
 name = "hyperlane-validator-blueprint"
 version = "0.1.0"
 dependencies = [
- "blueprint-metadata",
+ "blueprint-metadata 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-sdk",
  "bollard",
  "color-eyre",
  "dockworker",
@@ -7421,7 +7464,6 @@ dependencies = [
  "gadget-testing-utils",
  "hex",
  "reqwest 0.12.12",
- "tangle-blueprint-sdk",
  "tempfile",
  "testcontainers",
  "tokio",
