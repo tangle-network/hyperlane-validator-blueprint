@@ -6,4 +6,3 @@ fn main() {
     build::utils::soldeer_update();
     build::utils::build_contracts(contract_dirs);
 }
-
