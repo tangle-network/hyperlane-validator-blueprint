@@ -1,35 +1,20 @@
+use crate::HyperlaneContext;
+use blueprint_sdk::logging::setup_log;
+use blueprint_sdk::macros::ext::blueprint_serde::to_field;
+use blueprint_sdk::testing::tempfile::{self, TempDir};
+use blueprint_sdk::testing::utils::anvil::start_anvil_container;
+use blueprint_sdk::testing::utils::harness::TestHarness;
+use blueprint_sdk::testing::utils::runner::TestEnv;
+use blueprint_sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
+use bollard::container::RemoveContainerOptions;
+use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
+use color_eyre::Report;
+use color_eyre::Result;
+use dockworker::DockerBuilder;
 use std::path::Path;
 use std::process::Command;
-use ::gadget_sdk as sdk;
-use sdk::ext::tangle_subxt::tangle_testnet_runtime::api::runtime_types::bounded_collections::bounded_vec::BoundedVec;
-use sdk::ext::tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::field::BoundedString;
-use sdk::ext::tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::field::Field;
-use sdk::ext::tangle_subxt::tangle_testnet_runtime::api::services::calls::types::call::Args;
-use blueprint_test_utils::test_ext::*;
-use blueprint_test_utils::*;
-use blueprint_test_utils::eigenlayer_test_env::start_anvil_testnet;
-use blueprint_test_utils::tangle::NodeConfig;
-use sdk::error;
-use sdk::info;
-use sdk::docker::{bollard, connect_to_docker};
-use sdk::docker::bollard::container::RemoveContainerOptions;
-use sdk::docker::bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
-use tempfile::TempDir;
 use testcontainers::ContainerAsync;
 use testcontainers::GenericImage;
-
-pub fn setup_testing_log() {
-    use tracing_subscriber::util::SubscriberInitExt;
-    let env_filter = tracing_subscriber::EnvFilter::from_default_env();
-    let _ = tracing_subscriber::fmt::SubscriberBuilder::default()
-        .without_time()
-        .with_target(true)
-        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::NONE)
-        .with_env_filter(env_filter)
-        .with_test_writer()
-        .finish()
-        .try_init();
-}
 
 const AGENT_CONFIG_TEMPLATE_PATH: &str = "./test_assets/agent-config.json.template";
 const TEST_ASSETS_PATH: &str = "./test_assets";
@@ -87,16 +72,17 @@ fn setup_temp_dir(
 const TESTNET1_STATE_PATH: &str = "./test_assets/testnet1-state.json";
 const TESTNET2_STATE_PATH: &str = "./test_assets/testnet2-state.json";
 
-async fn spinup_anvil_testnets() -> (
+async fn spinup_anvil_testnets() -> Result<(
     (ContainerAsync<GenericImage>, String),
     (ContainerAsync<GenericImage>, String),
-) {
-    let (origin_container, _, _) = start_anvil_testnet(TESTNET1_STATE_PATH, false).await;
+)> {
+    let (origin_container, _, _) = start_anvil_container(TESTNET1_STATE_PATH, false).await;
 
-    let (dest_container, _, _) = start_anvil_testnet(TESTNET2_STATE_PATH, false).await;
+    let (dest_container, _, _) = start_anvil_container(TESTNET2_STATE_PATH, false).await;
 
-    let connection = connect_to_docker(None).await.unwrap();
+    let connection = DockerBuilder::new().await?;
     if let Err(e) = connection
+        .get_client()
         .create_network(CreateNetworkOptions {
             name: "hyperlane_validator_test_net",
             ..Default::default()
@@ -112,6 +98,7 @@ async fn spinup_anvil_testnets() -> (
     }
 
     connection
+        .get_client()
         .connect_network(
             "hyperlane_validator_test_net",
             ConnectNetworkOptions {
@@ -119,10 +106,10 @@ async fn spinup_anvil_testnets() -> (
                 ..Default::default()
             },
         )
-        .await
-        .unwrap();
+        .await?;
 
     connection
+        .get_client()
         .connect_network(
             "hyperlane_validator_test_net",
             ConnectNetworkOptions {
@@ -130,13 +117,12 @@ async fn spinup_anvil_testnets() -> (
                 ..Default::default()
             },
         )
-        .await
-        .unwrap();
+        .await?;
 
     let origin_container_inspect = connection
+        .get_client()
         .inspect_container(origin_container.id(), None)
-        .await
-        .unwrap();
+        .await?;
     let origin_network_settings = origin_container_inspect
         .network_settings
         .unwrap()
@@ -145,9 +131,9 @@ async fn spinup_anvil_testnets() -> (
         .clone();
 
     let dest_container_inspect = connection
+        .get_client()
         .inspect_container(dest_container.id(), None)
-        .await
-        .unwrap();
+        .await?;
     let dest_network_settings = dest_container_inspect
         .network_settings
         .unwrap()
@@ -155,23 +141,55 @@ async fn spinup_anvil_testnets() -> (
         .unwrap()["hyperlane_validator_test_net"]
         .clone();
 
-    (
+    Ok((
         (
             origin_container,
             origin_network_settings.ip_address.unwrap(),
         ),
         (dest_container, dest_network_settings.ip_address.unwrap()),
-    )
+    ))
 }
 
 #[ignore] // TODO: Invalid signer error from relayer
 #[tokio::test(flavor = "multi_thread")]
-#[allow(clippy::needless_return)]
-async fn validator() {
-    setup_testing_log();
+async fn validator() -> Result<()> {
+    setup_log();
 
+    // Test logic is separated so that cleanup is performed regardless of failure
+    let res = validator_test_inner().await;
+
+    // Cleanup network
+    let connection = DockerBuilder::new().await?;
+    let network = connection
+        .get_client()
+        .inspect_network(
+            "hyperlane_validator_test_net",
+            None::<InspectNetworkOptions<String>>,
+        )
+        .await?;
+    for container in network.containers.unwrap().keys() {
+        connection
+            .get_client()
+            .remove_container(
+                container,
+                Some(RemoveContainerOptions {
+                    force: true,
+                    ..Default::default()
+                }),
+            )
+            .await?;
+    }
+
+    connection
+        .remove_network("hyperlane_validator_test_net")
+        .await?;
+
+    res
+}
+
+async fn validator_test_inner() -> Result<()> {
     let ((origin_container, origin_container_ip), (dest_container, dest_container_ip)) =
-        spinup_anvil_testnets().await;
+        spinup_anvil_testnets().await?;
 
     // The validator itself uses the IPs internal to the Docker network.
     // When it comes time to relay the message, the command is run outside the Docker network,
@@ -182,8 +200,8 @@ async fn validator() {
     let testnet1_docker_rpc_url = format!("{}:8545", origin_container_ip);
     let testnet2_docker_rpc_url = format!("{}:8545", dest_container_ip);
 
-    let origin_ports = origin_container.ports().await.unwrap();
-    let dest_ports = dest_container.ports().await.unwrap();
+    let origin_ports = origin_container.ports().await?;
+    let dest_ports = dest_container.ports().await?;
 
     let testnet1_host_rpc_url = format!(
         "127.0.0.1:{}",
@@ -198,186 +216,133 @@ async fn validator() {
         (testnet1_docker_rpc_url, testnet1_host_rpc_url.clone()),
         (testnet2_docker_rpc_url, testnet2_host_rpc_url),
     );
-    let temp_dir_path = tempdir.path();
+    let temp_dir_path = tempdir.path().to_path_buf();
 
-    const N: usize = 1;
+    let harness = TangleTestHarness::setup(tempdir).await?;
 
-    new_test_ext_blueprint_manager::<N, 1, _, _, _>(
-        "",
-        run_test_blueprint_manager,
-        NodeConfig::new(false),
-    )
-    .await
-    .execute_with_async(move |client, handles, svcs, _| async move {
-        // At this point, blueprint has been deployed, every node has registered
-        // as an operator for the relevant services, and, all gadgets are running
+    let ctx = HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
 
-        let keypair = handles[0].sr25519_id().clone();
+    let handler = crate::SetConfigEventHandler::new(harness.env(), ctx)
+        .await
+        .map_err(|e| Report::msg(e.to_string()))?;
 
-        let service = svcs.services.last().unwrap();
+    // Setup service
+    let (mut test_env, service_id) = harness.setup_services().await?;
+    test_env.add_job(handler);
 
-        let service_id = service.id;
-        let call_id = get_next_call_id(client)
-            .await
-            .expect("Failed to get next job id")
-            .saturating_sub(1);
-        info!("Submitting job with params service ID: {service_id}, call ID: {call_id}");
+    tokio::spawn(async move {
+        test_env.run_runner().await.unwrap();
+    });
 
-        // Pass the arguments
-        let agent_config_path =
-            std::path::absolute(temp_dir_path.join("agent-config.json")).unwrap();
-        let config_urls = Field::List(BoundedVec(vec![Field::String(BoundedString(BoundedVec(
-            format!("file://{}", agent_config_path.display()).into_bytes(),
-        )))]));
-        let origin_chain_name = Field::String(BoundedString(BoundedVec(
-            String::from("testnet1").into_bytes(),
-        )));
+    // Pass the arguments
+    let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
+    let config_urls = to_field(Some(vec![format!(
+        "file://{}",
+        agent_config_path.display()
+    )]))?;
+    let origin_chain_name = to_field(String::from("testnet1"))?;
 
-        // Next step: submit a job under that service/job id
-        if let Err(err) = submit_job(
-            client,
-            &keypair,
+    // Execute job and verify result
+    let results = harness
+        .execute_job(
             service_id,
             0,
-            Args::from([config_urls, origin_chain_name]),
-            call_id,
+            vec![config_urls, origin_chain_name],
+            vec![OutputValue::Uint64(0)],
         )
-        .await
-        {
-            error!("Failed to submit job: {err}");
-            panic!("Failed to submit job: {err}");
-        }
+        .await?;
 
-        // Step 2: wait for the job to complete
-        let job_results = wait_for_completion_of_tangle_job(client, service_id, call_id, N)
-            .await
-            .expect("Failed to wait for job completion");
+    assert_eq!(results.service_id, service_id);
 
-        // Step 3: Get the job results, compare to expected value(s)
-        assert_eq!(job_results.service_id, service_id);
-        assert_eq!(job_results.call_id, call_id);
-        assert_eq!(job_results.result[0], Field::Uint64(0));
+    // The validator is now running, send a self-relayed message
+    tracing::info!("Validator running, sending message...");
 
-        // The validator is now running, send a self-relayed message
-        std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
-        let send_msg_output = Command::new("hyperlane")
-            .args([
-                "send",
-                "message",
-                "--registry",
-                ".",
-                "--relay",
-                "--origin",
-                "testnet1",
-                "--destination",
-                "testnet2",
-                "--quick",
-            ])
-            .env(
-                "HYP_KEY",
-                "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
-            )
-            .output()
-            .expect("Failed to run command");
+    std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
+    let send_msg_output = Command::new("hyperlane")
+        .args([
+            "send",
+            "message",
+            "--registry",
+            ".",
+            "--relay",
+            "--origin",
+            "testnet1",
+            "--destination",
+            "testnet2",
+        ])
+        .env(
+            "HYP_KEY",
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        )
+        .output()
+        .expect("Failed to run command");
 
-        if !send_msg_output.status.success() {
-            dbg!(String::from_utf8_lossy(&send_msg_output.stdout));
-            dbg!(
-                "Failed to send test message: {}",
-                String::from_utf8_lossy(&send_msg_output.stderr)
-            );
-            #[allow(clippy::empty_loop)] // TODO
-            loop {}
-        }
+    if !send_msg_output.status.success() {
+        tracing::error!("Failed to send test message");
+        tracing::error!("{}", String::from_utf8_lossy(&send_msg_output.stdout));
+        return Err(Report::msg("Failed to send test message"));
+    }
 
-        let stdout = String::from_utf8_lossy(&send_msg_output.stdout);
+    let stdout = String::from_utf8_lossy(&send_msg_output.stdout);
 
-        let mut msg_id = None;
-        for line in String::from_utf8_lossy(&send_msg_output.stdout).lines() {
-            let Some(id) = line.strip_prefix("Message ID: ") else {
-                continue;
-            };
-
-            msg_id = Some(id.to_string());
-            break;
-        }
-
-        let Some(msg_id) = msg_id else {
-            panic!("No message ID found in output: {stdout}")
+    let mut msg_id = None;
+    for line in String::from_utf8_lossy(&send_msg_output.stdout).lines() {
+        let Some(id) = line.strip_prefix("Message ID: ") else {
+            continue;
         };
 
-        tracing::info!("Message ID: {msg_id}");
+        msg_id = Some(id.to_string());
+        break;
+    }
 
-        // Give the command a few seconds
-        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+    let Some(msg_id) = msg_id else {
+        panic!("No message ID found in output: {stdout}")
+    };
 
-        tracing::info!("Mining a block");
-        Command::new("cast")
-            .args([
-                "rpc",
-                "anvil_mine",
-                "1",
-                "--rpc-url",
-                &*testnet1_host_rpc_url,
-            ])
-            .output()
-            .unwrap();
+    tracing::info!("Message ID: {msg_id}");
 
-        // Give the command a few seconds
-        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    // Give the command a few seconds
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
 
-        let msg_status_output = Command::new("hyperlane")
-            .args([
-                "status",
-                "--registry",
-                ".",
-                "--origin",
-                "testnet1",
-                "--destination",
-                "testnet2",
-                "--id",
-                &*msg_id,
-            ])
-            .env(
-                "HYP_KEY",
-                "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
-            )
-            .output()
-            .expect("Failed to run command");
+    tracing::info!("Mining a block");
+    Command::new("cast")
+        .args([
+            "rpc",
+            "anvil_mine",
+            "1",
+            "--rpc-url",
+            &*testnet1_host_rpc_url,
+        ])
+        .output()?;
 
-        assert!(msg_status_output.status.success());
-        assert!(String::from_utf8_lossy(&msg_status_output.stdout)
-            .contains(&format!("Message {msg_id} was delivered")));
-    })
-    .await;
+    // Give the command a few seconds
+    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+    let msg_status_output = Command::new("hyperlane")
+        .args([
+            "status",
+            "--registry",
+            ".",
+            "--origin",
+            "testnet1",
+            "--destination",
+            "testnet2",
+            "--id",
+            &*msg_id,
+        ])
+        .env(
+            "HYP_KEY",
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        )
+        .output()
+        .expect("Failed to run command");
+
+    assert!(msg_status_output.status.success());
+    assert!(String::from_utf8_lossy(&msg_status_output.stdout)
+        .contains(&format!("Message {msg_id} was delivered")));
 
     drop(origin_container);
     drop(dest_container);
 
-    // Cleanup network
-    let connection = connect_to_docker(None).await.unwrap();
-    let network = connection
-        .inspect_network(
-            "hyperlane_validator_test_net",
-            None::<InspectNetworkOptions<String>>,
-        )
-        .await
-        .unwrap();
-    for container in network.containers.unwrap().keys() {
-        connection
-            .remove_container(
-                container,
-                Some(RemoveContainerOptions {
-                    force: true,
-                    ..Default::default()
-                }),
-            )
-            .await
-            .unwrap();
-    }
-
-    connection
-        .remove_network("hyperlane_validator_test_net")
-        .await
-        .unwrap();
+    Ok(())
 }

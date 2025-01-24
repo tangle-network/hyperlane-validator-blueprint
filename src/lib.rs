@@ -1,35 +1,38 @@
 #[cfg(test)]
 mod e2e;
 
-use api::services::events::JobCalled;
+use blueprint_sdk as sdk;
 use color_eyre::Result;
-use gadget_sdk as sdk;
-use sdk::config::StdGadgetConfiguration;
-use sdk::contexts::{ServicesContext, TangleClientContext};
-use sdk::docker::bollard::network::ConnectNetworkOptions;
-use sdk::docker::bollard::Docker;
-use sdk::docker::connect_to_docker;
-use sdk::docker::Container;
-use sdk::event_listener::tangle::{
-    jobs::{services_post_processor, services_pre_processor},
-    TangleEventListener,
-};
-use sdk::keystore::BackendExt;
-use sdk::tangle_subxt::tangle_testnet_runtime::api;
 
-use std::path::PathBuf;
+use bollard::network::ConnectNetworkOptions;
+use color_eyre::eyre::eyre;
+use dockworker::container::Container;
+use dockworker::DockerBuilder;
+use sdk::config::GadgetConfiguration;
+use sdk::contexts::keystore::KeystoreContext;
+use sdk::crypto::sp_core::SpEcdsa;
+use sdk::crypto::tangle_pair_signer::TanglePairSigner;
+use sdk::event_listeners::tangle::events::TangleEventListener;
+use sdk::event_listeners::tangle::services::{services_post_processor, services_pre_processor};
+use sdk::keystore::backends::Backend;
+use sdk::macros::contexts::{ServicesContext, TangleClientContext};
+use sdk::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
-
-use color_eyre::eyre::eyre;
 use tokio::sync::Mutex;
+
+pub fn default_data_dir() -> PathBuf {
+    const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
+    Path::new(MANIFEST_DIR).join("data")
+}
 
 #[derive(Clone, TangleClientContext, ServicesContext)]
 pub struct HyperlaneContext {
     #[config]
-    pub env: StdGadgetConfiguration,
+    pub env: GadgetConfiguration,
     data_dir: PathBuf,
-    connection: Arc<Docker>,
+    connection: Arc<DockerBuilder>,
     container: Arc<Mutex<Option<String>>>,
     #[call_id]
     call_id: Option<u64>,
@@ -37,12 +40,12 @@ pub struct HyperlaneContext {
 
 const IMAGE: &str = "gcr.io/abacus-labs-dev/hyperlane-agent:main";
 impl HyperlaneContext {
-    pub async fn new(env: StdGadgetConfiguration, data_dir: PathBuf) -> Result<Self> {
-        let connection = connect_to_docker(None).await?;
+    pub async fn new(env: GadgetConfiguration, data_dir: PathBuf) -> Result<Self> {
+        let connection = DockerBuilder::new().await?;
         Ok(Self {
             env,
             data_dir,
-            connection,
+            connection: Arc::new(connection),
             container: Arc::new(Mutex::new(None)),
             call_id: None,
         })
@@ -63,11 +66,15 @@ impl HyperlaneContext {
             return Err(eyre!("Docker pull failed"));
         }
 
-        let mut container = Container::new(&self.connection, IMAGE);
+        let mut container = Container::new(self.connection.get_client(), IMAGE);
 
-        let keystore = self.env.keystore()?;
-        let ecdsa = keystore.ecdsa_key()?.alloy_key()?;
-        let secret = hex::encode(ecdsa.to_bytes());
+        let keystore = self.env.keystore();
+        let ecdsa_pub = keystore.first_local::<SpEcdsa>()?;
+        let ecdsa_pair = keystore.get_secret::<SpEcdsa>(&ecdsa_pub)?;
+        let tangle_ecdsa_pair = TanglePairSigner::new(ecdsa_pair.0);
+
+        let alloy_key = tangle_ecdsa_pair.alloy_key()?;
+        let secret = hex::encode(alloy_key.to_bytes());
 
         let hyperlane_db_path = self.hyperlane_db_path();
         if !hyperlane_db_path.exists() {
@@ -127,6 +134,7 @@ impl HyperlaneContext {
         if self.env.test_mode {
             let id = container.id().unwrap();
             self.connection
+                .get_client()
                 .connect_network(
                     "hyperlane_validator_test_net",
                     ConnectNetworkOptions {
@@ -193,7 +201,7 @@ impl HyperlaneContext {
         let mut container_id = self.container.lock().await;
         if let Some(container_id) = container_id.take() {
             tracing::warn!("Removing existing container...");
-            let mut c = Container::from_id(&self.connection, container_id).await?;
+            let mut c = Container::from_id(self.connection.get_client(), container_id).await?;
             c.stop().await?;
             c.remove(None).await?;
         }
