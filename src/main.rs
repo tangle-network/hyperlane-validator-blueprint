@@ -1,13 +1,11 @@
+use blueprint_sdk as sdk;
 use color_eyre::Result;
 use hyperlane_validator_blueprint as blueprint;
-use sdk::gadget_runners::core::runner::BlueprintRunner;
-use sdk::gadget_runners::tangle::tangle::TangleConfig;
-use tangle_blueprint_sdk as sdk;
+use sdk::runners::core::runner::BlueprintRunner;
+use sdk::runners::tangle::tangle::TangleConfig;
 
-#[sdk::gadget_macros::main(env)]
-async fn main() -> Result<()> {
-    color_eyre::install()?;
-
+#[sdk::main(env)]
+async fn main() {
     let data_dir = match env.data_dir.clone() {
         Some(dir) => dir,
         None => {

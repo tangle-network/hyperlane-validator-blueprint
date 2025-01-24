@@ -1,5 +1,9 @@
+use blueprint_sdk::build;
+
 fn main() {
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=src/main.rs");
-    blueprint_metadata::generate_json();
+    let contract_dirs: Vec<&str> = vec!["./contracts"];
+    build::utils::soldeer_install();
+    build::utils::soldeer_update();
+    build::utils::build_contracts(contract_dirs);
 }
+

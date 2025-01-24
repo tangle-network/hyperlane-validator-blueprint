@@ -8,17 +8,15 @@ use bollard::network::ConnectNetworkOptions;
 use color_eyre::eyre::eyre;
 use dockworker::container::Container;
 use dockworker::DockerBuilder;
-use gadget_macros::ext::keystore::backends::Backend;
 use sdk::config::GadgetConfiguration;
-use sdk::tangle::crypto::sp_core::SpEcdsa;
-use sdk::tangle::crypto_tangle_pair_signer::TanglePairSigner;
-use sdk::tangle::event_listeners::tangle::events::TangleEventListener;
-use sdk::tangle::event_listeners::tangle::services::{
-    services_post_processor, services_pre_processor,
-};
-use sdk::tangle::macros::contexts::{ServicesContext, TangleClientContext};
-use sdk::tangle::macros::ext::contexts::keystore::KeystoreContext;
-use sdk::tangle::macros::ext::tangle::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
+use sdk::contexts::keystore::KeystoreContext;
+use sdk::crypto::sp_core::SpEcdsa;
+use sdk::crypto::tangle_pair_signer::TanglePairSigner;
+use sdk::event_listeners::tangle::events::TangleEventListener;
+use sdk::event_listeners::tangle::services::{services_post_processor, services_pre_processor};
+use sdk::keystore::backends::Backend;
+use sdk::macros::contexts::{ServicesContext, TangleClientContext};
+use sdk::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
@@ -232,7 +230,7 @@ impl HyperlaneContext {
     }
 }
 
-#[sdk::tangle::macros::job(
+#[sdk::job(
     id = 0,
     params(config_urls, origin_chain_name),
     result(_),

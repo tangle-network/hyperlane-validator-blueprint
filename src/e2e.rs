@@ -1,16 +1,18 @@
 use crate::HyperlaneContext;
+use blueprint_sdk::logging::setup_log;
+use blueprint_sdk::macros::ext::blueprint_serde::to_field;
+use blueprint_sdk::testing::tempfile::{self, TempDir};
+use blueprint_sdk::testing::utils::anvil::start_anvil_container;
+use blueprint_sdk::testing::utils::harness::TestHarness;
+use blueprint_sdk::testing::utils::runner::TestEnv;
+use blueprint_sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
 use bollard::container::RemoveContainerOptions;
 use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
 use color_eyre::Report;
 use color_eyre::Result;
 use dockworker::DockerBuilder;
-use gadget_macros::ext::blueprint_serde::to_field;
-use gadget_testing_utils::anvil::start_anvil_container;
-use gadget_testing_utils::tangle::{OutputValue, TangleTestHarness};
 use std::path::Path;
 use std::process::Command;
-use tangle_blueprint_sdk::gadget_logging::setup_log;
-use tempfile::TempDir;
 use testcontainers::ContainerAsync;
 use testcontainers::GenericImage;
 
@@ -97,18 +99,24 @@ async fn spinup_anvil_testnets() -> Result<(
 
     connection
         .get_client()
-        .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
-            container: origin_container.id(),
-            ..Default::default()
-        })
+        .connect_network(
+            "hyperlane_validator_test_net",
+            ConnectNetworkOptions {
+                container: origin_container.id(),
+                ..Default::default()
+            },
+        )
         .await?;
 
     connection
         .get_client()
-        .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
-            container: dest_container.id(),
-            ..Default::default()
-        })
+        .connect_network(
+            "hyperlane_validator_test_net",
+            ConnectNetworkOptions {
+                container: dest_container.id(),
+                ..Default::default()
+            },
+        )
         .await?;
 
     let origin_container_inspect = connection
@@ -142,11 +150,44 @@ async fn spinup_anvil_testnets() -> Result<(
     ))
 }
 
-//#[ignore] // TODO: Invalid signer error from relayer
+#[ignore] // TODO: Invalid signer error from relayer
 #[tokio::test(flavor = "multi_thread")]
 async fn validator() -> Result<()> {
     setup_log();
 
+    // Test logic is separated so that cleanup is performed regardless of failure
+    let res = validator_test_inner().await;
+
+    // Cleanup network
+    let connection = DockerBuilder::new().await?;
+    let network = connection
+        .get_client()
+        .inspect_network(
+            "hyperlane_validator_test_net",
+            None::<InspectNetworkOptions<String>>,
+        )
+        .await?;
+    for container in network.containers.unwrap().keys() {
+        connection
+            .get_client()
+            .remove_container(
+                container,
+                Some(RemoveContainerOptions {
+                    force: true,
+                    ..Default::default()
+                }),
+            )
+            .await?;
+    }
+
+    connection
+        .remove_network("hyperlane_validator_test_net")
+        .await?;
+
+    res
+}
+
+async fn validator_test_inner() -> Result<()> {
     let ((origin_container, origin_container_ip), (dest_container, dest_container_ip)) =
         spinup_anvil_testnets().await?;
 
@@ -175,20 +216,26 @@ async fn validator() -> Result<()> {
         (testnet1_docker_rpc_url, testnet1_host_rpc_url.clone()),
         (testnet2_docker_rpc_url, testnet2_host_rpc_url),
     );
-    let temp_dir_path = tempdir.path();
+    let temp_dir_path = tempdir.path().to_path_buf();
 
-    let harness = TangleTestHarness::setup().await?;
+    let harness = TangleTestHarness::setup(tempdir).await?;
 
-    let ctx = HyperlaneContext::new(harness.env.clone(), temp_dir_path.into()).await?;
+    let ctx = HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
 
-    let handler = crate::SetConfigEventHandler::new(&harness.env, ctx)
+    let handler = crate::SetConfigEventHandler::new(harness.env(), ctx)
         .await
         .map_err(|e| Report::msg(e.to_string()))?;
 
-    let (_blueprint_id, service_id) = harness.setup_service(vec![handler]).await?;
+    // Setup service
+    let (mut test_env, service_id) = harness.setup_services().await?;
+    test_env.add_job(handler);
+
+    tokio::spawn(async move {
+        test_env.run_runner().await.unwrap();
+    });
 
     // Pass the arguments
-    let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json")).unwrap();
+    let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
     let config_urls = to_field(Some(vec![format!(
         "file://{}",
         agent_config_path.display()
@@ -197,9 +244,12 @@ async fn validator() -> Result<()> {
 
     // Execute job and verify result
     let results = harness
-        .execute_job(service_id, 0, vec![config_urls, origin_chain_name], vec![
-            OutputValue::Uint64(0),
-        ])
+        .execute_job(
+            service_id,
+            0,
+            vec![config_urls, origin_chain_name],
+            vec![OutputValue::Uint64(0)],
+        )
         .await?;
 
     assert_eq!(results.service_id, service_id);
@@ -219,11 +269,10 @@ async fn validator() -> Result<()> {
             "testnet1",
             "--destination",
             "testnet2",
-            "--quick",
         ])
         .env(
             "HYP_KEY",
-            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
         )
         .output()
         .expect("Failed to run command");
@@ -283,45 +332,17 @@ async fn validator() -> Result<()> {
         ])
         .env(
             "HYP_KEY",
-            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
         )
         .output()
         .expect("Failed to run command");
 
     assert!(msg_status_output.status.success());
-    assert!(
-        String::from_utf8_lossy(&msg_status_output.stdout)
-            .contains(&format!("Message {msg_id} was delivered"))
-    );
+    assert!(String::from_utf8_lossy(&msg_status_output.stdout)
+        .contains(&format!("Message {msg_id} was delivered")));
 
     drop(origin_container);
     drop(dest_container);
-
-    // Cleanup network
-    let connection = DockerBuilder::new().await?;
-    let network = connection
-        .get_client()
-        .inspect_network(
-            "hyperlane_validator_test_net",
-            None::<InspectNetworkOptions<String>>,
-        )
-        .await?;
-    for container in network.containers.unwrap().keys() {
-        connection
-            .get_client()
-            .remove_container(
-                container,
-                Some(RemoveContainerOptions {
-                    force: true,
-                    ..Default::default()
-                }),
-            )
-            .await?;
-    }
-
-    connection
-        .remove_network("hyperlane_validator_test_net")
-        .await?;
 
     Ok(())
 }
