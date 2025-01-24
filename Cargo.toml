@@ -17,15 +17,15 @@ color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.43.0"
 reqwest = "0.12.12"
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget-workspace.git", features = ["tangle", "evm", "macros"] }
+blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["tangle", "evm", "macros"] }
 dockworker = { git = "https://github.com/tangle-network/dockworker", branch = "serial/cleanup", features = ["docker"] }
 bollard = "0.17"
 
 [build-dependencies]
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget-workspace.git", features = ["build"] }
+blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["build"] }
 
 [dev-dependencies]
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget-workspace.git", features = ["testing", "evm"] }
+blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["testing", "evm"] }
 testcontainers = "0.23.1"
 
 [lib]
