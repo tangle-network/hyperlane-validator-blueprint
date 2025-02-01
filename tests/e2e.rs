@@ -1,5 +1,4 @@
-use crate::HyperlaneContext;
-use blueprint_sdk::logging::setup_log;
+use blueprint_sdk::logging::{self, setup_log};
 use blueprint_sdk::macros::ext::blueprint_serde::to_field;
 use blueprint_sdk::testing::tempfile::{self, TempDir};
 use blueprint_sdk::testing::utils::anvil::start_anvil_container;
@@ -11,8 +10,10 @@ use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetwo
 use color_eyre::Report;
 use color_eyre::Result;
 use dockworker::DockerBuilder;
-use std::path::Path;
+use hyperlane_validator_blueprint::{HyperlaneContext, SetConfigEventHandler};
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::LazyLock;
 use testcontainers::ContainerAsync;
 use testcontainers::GenericImage;
 
@@ -22,51 +23,49 @@ const TEST_ASSETS_PATH: &str = "./test_assets";
 fn setup_temp_dir(
     (testnet1_docker_rpc_url, testnet1_host_rpc_url): (String, String),
     (testnet2_docker_rpc_url, testnet2_host_rpc_url): (String, String),
-) -> TempDir {
+) -> Result<TempDir> {
     const FILE_PREFIXES: [&str; 2] = ["testnet1", "testnet2"];
 
-    let tempdir = tempfile::tempdir().unwrap();
+    let tempdir = tempfile::tempdir()?;
 
     // Create the signatures directory
     let signatures_path = tempdir.path().join("signatures-testnet1");
-    std::fs::create_dir_all(&signatures_path).unwrap();
+    std::fs::create_dir_all(&signatures_path)?;
 
     // Create the registry
     let registry_path = tempdir.path().join("chains");
-    std::fs::create_dir(&registry_path).unwrap();
+    std::fs::create_dir(&registry_path)?;
 
     for (prefix, rpc_url) in FILE_PREFIXES
         .iter()
         .zip([&*testnet1_host_rpc_url, &*testnet2_host_rpc_url])
     {
         let testnet_path = registry_path.join(prefix);
-        std::fs::create_dir(&testnet_path).unwrap();
+        std::fs::create_dir(&testnet_path)?;
 
         let addresses_path = Path::new(TEST_ASSETS_PATH).join(format!("{prefix}-addresses.yaml"));
-        std::fs::copy(addresses_path, testnet_path.join("addresses.yaml")).unwrap();
+        std::fs::copy(addresses_path, testnet_path.join("addresses.yaml"))?;
 
         let metadata_template_path =
             Path::new(TEST_ASSETS_PATH).join(format!("{prefix}-metadata.yaml.template"));
-        let testnet1_metadata = std::fs::read_to_string(metadata_template_path).unwrap();
+        let testnet1_metadata = std::fs::read_to_string(metadata_template_path)?;
         std::fs::write(
             testnet_path.join("metadata.yaml"),
             testnet1_metadata.replace("{RPC_URL}", rpc_url),
-        )
-        .unwrap();
+        )?;
     }
 
     // Create agent config
-    let agent_config_template = std::fs::read_to_string(AGENT_CONFIG_TEMPLATE_PATH).unwrap();
+    let agent_config_template = std::fs::read_to_string(AGENT_CONFIG_TEMPLATE_PATH)?;
     std::fs::write(
         tempdir.path().join("agent-config.json"),
         agent_config_template
             .replace("{TESTNET_1_RPC}", &testnet1_docker_rpc_url)
             .replace("{TESTNET_2_RPC}", &testnet2_docker_rpc_url)
             .replace("{TMP_SYNCER_DIR}", &signatures_path.to_string_lossy()),
-    )
-    .unwrap();
+    )?;
 
-    tempdir
+    Ok(tempdir)
 }
 
 const TESTNET1_STATE_PATH: &str = "./test_assets/testnet1-state.json";
@@ -93,7 +92,7 @@ async fn spinup_anvil_testnets() -> Result<(
             bollard::errors::Error::DockerResponseServerError {
                 status_code: 409, ..
             } => {}
-            _ => panic!("{e}"),
+            _ => return Err(e.into()),
         }
     }
 
@@ -150,10 +149,24 @@ async fn spinup_anvil_testnets() -> Result<(
     ))
 }
 
-#[ignore] // TODO: Invalid signer error from relayer
+static HYPERLANE_CLI_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    Path::new(".")
+        .canonicalize()
+        .unwrap()
+        .join("node_modules")
+        .join(".bin")
+        .join("hyperlane")
+});
+
 #[tokio::test(flavor = "multi_thread")]
 async fn validator() -> Result<()> {
     setup_log();
+
+    if !HYPERLANE_CLI_PATH.exists() {
+        return Err(Report::msg(
+            "Hyperlane CLI not found, make sure to run `npm install`!",
+        ));
+    }
 
     // Test logic is separated so that cleanup is performed regardless of failure
     let res = validator_test_inner().await;
@@ -215,16 +228,14 @@ async fn validator_test_inner() -> Result<()> {
     let tempdir = setup_temp_dir(
         (testnet1_docker_rpc_url, testnet1_host_rpc_url.clone()),
         (testnet2_docker_rpc_url, testnet2_host_rpc_url),
-    );
+    )?;
     let temp_dir_path = tempdir.path().to_path_buf();
 
     let harness = TangleTestHarness::setup(tempdir).await?;
 
     let ctx = HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
 
-    let handler = crate::SetConfigEventHandler::new(harness.env(), ctx)
-        .await
-        .map_err(|e| Report::msg(e.to_string()))?;
+    let handler = SetConfigEventHandler::new(harness.env(), ctx).await?;
 
     // Setup service
     let (mut test_env, service_id) = harness.setup_services().await?;
@@ -258,7 +269,7 @@ async fn validator_test_inner() -> Result<()> {
     tracing::info!("Validator running, sending message...");
 
     std::env::set_current_dir(temp_dir_path).expect("Failed to change directory");
-    let send_msg_output = Command::new("hyperlane")
+    let send_msg_output = Command::new(&*HYPERLANE_CLI_PATH)
         .args([
             "send",
             "message",
@@ -274,12 +285,13 @@ async fn validator_test_inner() -> Result<()> {
             "HYP_KEY",
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
         )
-        .output()
-        .expect("Failed to run command");
+        .output()?;
 
     if !send_msg_output.status.success() {
-        tracing::error!("Failed to send test message");
-        tracing::error!("{}", String::from_utf8_lossy(&send_msg_output.stdout));
+        logging::error!(
+            "Failed to send test message: {}",
+            String::from_utf8_lossy(&send_msg_output.stderr)
+        );
         return Err(Report::msg("Failed to send test message"));
     }
 
@@ -318,7 +330,7 @@ async fn validator_test_inner() -> Result<()> {
     // Give the command a few seconds
     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
-    let msg_status_output = Command::new("hyperlane")
+    let msg_status_output = Command::new(&*HYPERLANE_CLI_PATH)
         .args([
             "status",
             "--registry",
@@ -334,12 +346,25 @@ async fn validator_test_inner() -> Result<()> {
             "HYP_KEY",
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
         )
-        .output()
-        .expect("Failed to run command");
+        .output()?;
 
-    assert!(msg_status_output.status.success());
-    assert!(String::from_utf8_lossy(&msg_status_output.stdout)
-        .contains(&format!("Message {msg_id} was delivered")));
+    if !msg_status_output.status.success() {
+        logging::error!(
+            "Failed to check message status: {}",
+            String::from_utf8_lossy(&msg_status_output.stderr)
+        );
+        return Err(Report::msg("Failed to check message status"));
+    }
+
+    if !String::from_utf8_lossy(&msg_status_output.stdout)
+        .contains(&format!("Message {msg_id} was delivered"))
+    {
+        logging::error!(
+            "Message was not delivered: {}",
+            String::from_utf8_lossy(&msg_status_output.stderr)
+        );
+        return Err(Report::msg("Message was not delivered"));
+    }
 
     drop(origin_container);
     drop(dest_container);

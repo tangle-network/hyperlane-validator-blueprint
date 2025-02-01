@@ -1,11 +1,7 @@
-#[cfg(test)]
-mod e2e;
-
 use blueprint_sdk as sdk;
-use color_eyre::Result;
-
 use bollard::network::ConnectNetworkOptions;
 use color_eyre::eyre::eyre;
+use color_eyre::Result;
 use dockworker::container::Container;
 use dockworker::DockerBuilder;
 use sdk::config::GadgetConfiguration;
