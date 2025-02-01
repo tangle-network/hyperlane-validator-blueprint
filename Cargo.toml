@@ -32,8 +32,8 @@ testcontainers = "0.23.1"
 path = "src/lib.rs"
 
 [[bin]]
-name = "hyperlane-relayer-blueprint"
+name = "hyperlane-validator-blueprint"
 path = "src/main.rs"
 
 [package.metadata.blueprint]
-manager = { Evm = "HyperlaneRelayerBlueprint" }
+manager = { Evm = "HyperlaneValidatorBlueprint" }
