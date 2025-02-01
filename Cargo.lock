@@ -4324,7 +4324,7 @@ dependencies = [
 [[package]]
 name = "dockworker"
 version = "0.1.0"
-source = "git+https://github.com/tangle-network/dockworker?branch=serial%2Fcleanup#f52a9919a69a33ad18404d3c6dd34199c7daa1a9"
+source = "git+https://github.com/tangle-network/dockworker#b225050350e479f71294db3666060d34874eab67"
 dependencies = [
  "async-trait",
  "bollard",

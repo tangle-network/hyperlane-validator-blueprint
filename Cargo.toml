@@ -18,7 +18,7 @@ hex = "0.4.3"
 tokio = "1.43.0"
 reqwest = "0.12.12"
 blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["tangle", "evm", "macros"] }
-dockworker = { git = "https://github.com/tangle-network/dockworker", branch = "serial/cleanup", features = ["docker"] }
+dockworker = { git = "https://github.com/tangle-network/dockworker", features = ["docker"] }
 bollard = "0.17"
 
 [build-dependencies]
