@@ -3253,7 +3253,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde0e0ec90c9dfb3b4b1a0891a7dcd0e2bffde2f7efed5fe7c9bb00e5bfb915e"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -4080,7 +4080,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1145d32e826a7748b69ee8fc62d3e6355ff7f1051df53141e7048162fc90481b"
 dependencies = [
  "data-encoding",
- "syn 2.0.96",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -4323,7 +4323,7 @@ dependencies = [
 [[package]]
 name = "dockworker"
 version = "0.1.0"
-source = "git+https://github.com/tangle-network/dockworker?branch=serial%2Fcleanup#f52a9919a69a33ad18404d3c6dd34199c7daa1a9"
+source = "git+https://github.com/tangle-network/dockworker?branch=serial%2Fcleanup#ab06ec6d793e3fca6dfb4c4fe7d08057259b5c95"
 dependencies = [
  "async-trait",
  "bollard",
@@ -18266,7 +18266,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
