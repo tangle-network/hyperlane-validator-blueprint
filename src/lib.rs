@@ -1,11 +1,7 @@
-#[cfg(test)]
-mod e2e;
-
 use blueprint_sdk as sdk;
-use color_eyre::Result;
-
 use bollard::network::ConnectNetworkOptions;
 use color_eyre::eyre::eyre;
+use color_eyre::Result;
 use dockworker::container::Container;
 use dockworker::DockerBuilder;
 use sdk::config::GadgetConfiguration;
@@ -38,7 +34,7 @@ pub struct HyperlaneContext {
     call_id: Option<u64>,
 }
 
-const IMAGE: &str = "gcr.io/abacus-labs-dev/hyperlane-agent:main";
+const IMAGE: &str = "gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.2.0";
 impl HyperlaneContext {
     pub async fn new(env: GadgetConfiguration, data_dir: PathBuf) -> Result<Self> {
         let connection = DockerBuilder::new().await?;

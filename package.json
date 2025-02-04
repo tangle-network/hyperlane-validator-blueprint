@@ -1,0 +1,12 @@
+{
+  "name": "hyperlane-validator-blueprint",
+  "version": "1.0.0",
+  "description": "A Hyperlane AVS Blueprint for Tangle / Eigenlayer / and other restaking infrastructures.",
+  "main": "index.js",
+  "repository": "https://github.com/tangle-network/hyperlane-validator-blueprint",
+  "author": "hello@webb.tools",
+  "license": "MIT",
+  "dependencies": {
+    "@hyperlane-xyz/core": "^5.11.1"
+  }
+}

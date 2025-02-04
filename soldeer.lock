@@ -1,4 +1,18 @@
 [[dependencies]]
+name = "@openzeppelin-contracts"
+version = "4.9.3"
+url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/4_9_3_22-01-2024_13:13:53_contracts.zip"
+checksum = "95886307069cf73310b41396c49df51801a73f31f18f62e7d05adfc2031e7725"
+integrity = "6daa959732c1bceabda7f2823d1baa097b96509b48db78cb2e3ddd38bd4fd030"
+
+[[dependencies]]
+name = "@openzeppelin-contracts-upgradeable"
+version = "4.9.3"
+url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts-upgradeable/4_9_3_22-01-2024_13:15:05_contracts-upgradeable.zip"
+checksum = "9ad25907929442198cbb24a1a55707ff182069c2cf8abc58327c96c142339aab"
+integrity = "697b8ee28ee936527af02f2d59bb219f86cefe5d696fe5ddc9f7bee15cf5bb37"
+
+[[dependencies]]
 name = "tnt-core"
 version = "0.1.0"
 url = "https://soldeer-revisions.s3.amazonaws.com/tnt-core/0_1_0_10-12-2024_20:51:20_tnt-core.zip"

@@ -1,20 +1,21 @@
-owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+defaultHook:
+  address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+  type: merkleTreeHook
 defaultIsm:
-  address: "0xB8e8c9eC2b828a248b7c5531695b7F7B333BC120"
+  address: "0x5784A62323C29de27F9C078D31aA9370Ce829104"
+  threshold: 1
   type: messageIdMultisigIsm
   validators:
     - "0xE04CC55ebEE1cBCE552f250e85c57B70B2E2625b"
-  threshold: 1
-defaultHook:
-  address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
-  type: merkleTreeHook
-requiredHook:
-  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-  address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
-  type: protocolFee
-  maxProtocolFee: "100000000000000000"
-  protocolFee: "0"
-  beneficiary: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 proxyAdmin:
+  address: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
   owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-  address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+requiredHook:
+  address: "0x9A676e781A523b5d0C0e43731313A708CB607508"
+  beneficiary: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  maxProtocolFee: "100000000000000000"
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  protocolFee: "0"
+  type: protocolFee
+
