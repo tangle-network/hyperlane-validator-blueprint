@@ -1,7 +1,7 @@
 defaultHook:
   type: merkleTreeHook
 defaultIsm:
-  relayer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  relayer: "0x0d8D37554AdD72eE5249Ba48F4b149eb47d82DE2"
   type: trustedRelayerIsm
 owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 proxyAdmin:

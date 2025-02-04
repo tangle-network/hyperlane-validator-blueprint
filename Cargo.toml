@@ -26,7 +26,9 @@ blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features
 
 [dev-dependencies]
 blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["testing", "evm"] }
+hyperlane-relayer-blueprint = { git = "https://github.com/tangle-network/hyperlane-relayer-blueprint.git" }
 testcontainers = "0.23.1"
+futures = "0.3.31"
 
 [lib]
 path = "src/lib.rs"

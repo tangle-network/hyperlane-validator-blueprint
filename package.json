@@ -7,6 +7,6 @@
   "author": "hello@webb.tools",
   "license": "MIT",
   "dependencies": {
-    "@hyperlane-xyz/cli": "^8.5.0"
+    "@hyperlane-xyz/core": "^5.11.1"
   }
 }
