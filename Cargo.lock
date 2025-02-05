@@ -7593,7 +7593,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-relayer-blueprint"
 version = "0.1.0"
-source = "git+https://github.com/tangle-network/hyperlane-relayer-blueprint.git#a53d62cce941d22beebc4bce8288354dc2a2d539"
+source = "git+https://github.com/tangle-network/hyperlane-relayer-blueprint.git#af9977759f1f6849916ecf46ac017d4eeff5c1f0"
 dependencies = [
  "blueprint-sdk",
  "color-eyre",
