@@ -15,7 +15,7 @@ keywords = ["tangle", "blueprint", "avs"]
 tracing = "0.1"
 color-eyre = "0.6"
 hex = "0.4.3"
-tokio = "1.44.0"
+tokio = "1.44.1"
 reqwest = "0.12.12"
 blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["tangle", "evm", "macros"] }
 dockworker = { git = "https://github.com/tangle-network/dockworker", features = ["docker"] }
