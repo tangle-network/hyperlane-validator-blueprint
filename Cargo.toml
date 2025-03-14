@@ -1,7 +1,37 @@
 [package]
-name = "hyperlane-validator-blueprint"
+name = "hyperlane-validator-blueprint-lib"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+categories.workspace = true
+keywords.workspace = true
+
+[dependencies]
+blueprint-sdk = { workspace = true, features = ["tangle", "evm", "macros"] }
+color-eyre.workspace = true
+tracing.workspace = true
+tokio.workspace = true
+hex.workspace = true
+reqwest.workspace = true
+dockworker = { workspace = true, features = ["docker"] }
+bollard.workspace = true
+
+[dev-dependencies]
+blueprint-sdk = { workspace = true, features = ["testing", "evm"] }
+hyperlane-relayer-blueprint-lib = { git = "https://github.com/tangle-network/hyperlane-relayer-blueprint.git" }
+testcontainers = "0.23.1"
+futures = "0.3.31"
+
+[workspace]
+members = ["hyperlane-validator-bin", "."]
+
+[workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "A Tangle Blueprint (AVS) for deploying Hyperlane validators"
 authors = ["Serial <69764315+Serial-ATA@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
@@ -11,31 +41,16 @@ readme = "README.md"
 categories = ["cryptography", "cryptography::cryptocurrencies"]
 keywords = ["tangle", "blueprint", "avs"]
 
-[dependencies]
+[workspace.dependencies]
+# Our blueprint
+hyperlane-validator-blueprint-lib = { path = "." }
+
 tracing = "0.1"
+tracing-subscriber = "0.3.19"
 color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.44.0"
 reqwest = "0.12.12"
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["tangle", "evm", "macros"] }
-dockworker = { git = "https://github.com/tangle-network/dockworker", features = ["docker"] }
+blueprint-sdk = { git = "https://github.com/tangle-network/blueprint.git" }
+dockworker = { git = "https://github.com/tangle-network/dockworker" }
 bollard = "0.17"
-
-[build-dependencies]
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["build"] }
-
-[dev-dependencies]
-blueprint-sdk = { git = "https://github.com/tangle-network/gadget.git", features = ["testing", "evm"] }
-hyperlane-relayer-blueprint = { git = "https://github.com/tangle-network/hyperlane-relayer-blueprint.git" }
-testcontainers = "0.23.1"
-futures = "0.3.31"
-
-[lib]
-path = "src/lib.rs"
-
-[[bin]]
-name = "hyperlane-validator-blueprint"
-path = "src/main.rs"
-
-[package.metadata.blueprint]
-manager = { Evm = "HyperlaneValidatorBlueprint" }

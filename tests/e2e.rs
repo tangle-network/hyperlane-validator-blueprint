@@ -1,34 +1,37 @@
-use blueprint_sdk::alloy::network::EthereumWallet;
-use blueprint_sdk::alloy::primitives::{address, Address, Bytes};
-use blueprint_sdk::alloy::providers::{Provider, RootProvider};
-use blueprint_sdk::alloy::rpc::types::Filter;
-use blueprint_sdk::alloy::signers::local::PrivateKeySigner;
-use blueprint_sdk::alloy::sol;
-use blueprint_sdk::alloy::sol_types::SolEvent;
-use blueprint_sdk::alloy::transports::BoxTransport;
-use blueprint_sdk::config::GadgetConfiguration;
-use blueprint_sdk::contexts::keystore::KeystoreContext;
-use blueprint_sdk::crypto::sp_core::SpEcdsa;
-use blueprint_sdk::keystore::backends::Backend;
-use blueprint_sdk::logging::{self, setup_log};
-use blueprint_sdk::macros::ext::blueprint_serde::to_field;
-use blueprint_sdk::macros::ext::futures::StreamExt;
-use blueprint_sdk::testing::tempfile::{self, TempDir};
-use blueprint_sdk::testing::utils::anvil::start_anvil_container;
-use blueprint_sdk::testing::utils::harness::TestHarness;
-use blueprint_sdk::testing::utils::runner::TestEnv;
-use blueprint_sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
-use blueprint_sdk::utils::evm::get_wallet_provider_http;
+use blueprint_sdk as sdk;
 use bollard::container::RemoveContainerOptions;
 use bollard::models::EndpointSettings;
 use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
 use color_eyre::Report;
 use color_eyre::Result;
 use dockworker::DockerBuilder;
-use hyperlane_validator_blueprint::{HyperlaneContext, SetConfigEventHandler};
+use futures::StreamExt;
+use hyperlane_validator_blueprint_lib as blueprint;
+use sdk::Job;
+use sdk::alloy::network::EthereumWallet;
+use sdk::alloy::primitives::{Address, Bytes, address};
+use sdk::alloy::providers::{Provider, RootProvider};
+use sdk::alloy::rpc::types::Filter;
+use sdk::alloy::signers::local::PrivateKeySigner;
+use sdk::alloy::sol;
+use sdk::alloy::sol_types::SolEvent;
+use sdk::crypto::sp_core::SpEcdsa;
+use sdk::evm::util::get_wallet_provider_http;
+use sdk::extract::Context;
+use sdk::keystore::backends::Backend;
+use sdk::runner::config::BlueprintEnvironment;
+use sdk::serde::to_field;
+use sdk::tangle::extract::TangleArgs2;
+use sdk::tangle::layers::TangleLayer;
+use sdk::testing::tempfile::{self, TempDir};
+use sdk::testing::utils::anvil::start_anvil_container;
+use sdk::testing::utils::setup_log;
+use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
+use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
+use std::sync::Arc;
 use std::time::Duration;
 use testcontainers::ContainerAsync;
 use testcontainers::GenericImage;
@@ -46,26 +49,26 @@ fn setup_temp_dir(
 
     // Create the signatures directory
     let signatures_path = tempdir.path().join("signatures-testnet1");
-    std::fs::create_dir_all(&signatures_path)?;
+    fs::create_dir_all(&signatures_path)?;
 
     // Create the registry
     let registry_path = tempdir.path().join("chains");
-    std::fs::create_dir(&registry_path)?;
+    fs::create_dir(&registry_path)?;
 
     for (prefix, rpc_url) in FILE_PREFIXES
         .iter()
         .zip([&*testnet1_host_rpc_url, &*testnet2_host_rpc_url])
     {
         let testnet_path = registry_path.join(prefix);
-        std::fs::create_dir(&testnet_path)?;
+        fs::create_dir(&testnet_path)?;
 
         let addresses_path = Path::new(TEST_ASSETS_PATH).join(format!("{prefix}-addresses.yaml"));
-        std::fs::copy(addresses_path, testnet_path.join("addresses.yaml"))?;
+        fs::copy(addresses_path, testnet_path.join("addresses.yaml"))?;
 
         let metadata_template_path =
             Path::new(TEST_ASSETS_PATH).join(format!("{prefix}-metadata.yaml.template"));
-        let testnet1_metadata = std::fs::read_to_string(metadata_template_path)?;
-        std::fs::write(
+        let testnet1_metadata = fs::read_to_string(metadata_template_path)?;
+        fs::write(
             testnet_path.join("metadata.yaml"),
             testnet1_metadata.replace("{RPC_URL}", rpc_url),
         )?;
@@ -88,8 +91,8 @@ fn new_agent_config(
     testnet2_rpc: &str,
     tmp_syncer_dir: &str,
 ) -> Result<()> {
-    let agent_config_template = std::fs::read_to_string(AGENT_CONFIG_TEMPLATE_PATH)?;
-    std::fs::write(
+    let agent_config_template = fs::read_to_string(AGENT_CONFIG_TEMPLATE_PATH)?;
+    fs::write(
         output_path,
         agent_config_template
             .replace("{TESTNET_1_RPC}", testnet1_rpc)
@@ -106,10 +109,14 @@ const TESTNET2_STATE_PATH: &str = "./test_assets/testnet2-state.json";
 const VALIDATOR_NETWORK_NAME: &str = "hyperlane_validator_test_net";
 const RELAYER_NETWORK_NAME: &str = "hyperlane_relayer_test_net";
 
+#[allow(dead_code)]
 struct Testnet {
     container: ContainerAsync<GenericImage>,
     validator_network_ip: String,
     relayer_network_ip: String,
+    http: String,
+    ws: String,
+    tmp_dir: TempDir,
 }
 
 async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
@@ -137,24 +144,18 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
 
         connection
             .get_client()
-            .connect_network(
-                network,
-                ConnectNetworkOptions {
-                    container: origin.id(),
-                    ..Default::default()
-                },
-            )
+            .connect_network(network, ConnectNetworkOptions {
+                container: origin.id(),
+                ..Default::default()
+            })
             .await?;
 
         connection
             .get_client()
-            .connect_network(
-                network,
-                ConnectNetworkOptions {
-                    container: dest.id(),
-                    ..Default::default()
-                },
-            )
+            .connect_network(network, ConnectNetworkOptions {
+                container: dest.id(),
+                ..Default::default()
+            })
             .await?;
 
         let origin_container_inspect = connection
@@ -182,9 +183,13 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
         Ok((origin_network_settings, dest_network_settings))
     }
 
-    let (origin_container, _, _) = start_anvil_container(TESTNET1_STATE_PATH, false).await;
+    let origin_state = fs::read_to_string(TESTNET1_STATE_PATH)?;
+    let (origin_container, origin_http, origin_ws, origin_tmp_dir) =
+        start_anvil_container(&origin_state, false).await;
 
-    let (dest_container, _, _) = start_anvil_container(TESTNET2_STATE_PATH, false).await;
+    let dest_state = fs::read_to_string(TESTNET2_STATE_PATH)?;
+    let (dest_container, dest_http, dest_ws, dest_tmp_dir) =
+        start_anvil_container(&dest_state, false).await;
 
     let connection = DockerBuilder::new().await?;
     let validator_network_config = setup_network(
@@ -208,11 +213,17 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
             container: origin_container,
             validator_network_ip: validator_network_config.0.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.0.ip_address.unwrap(),
+            http: origin_http,
+            ws: origin_ws,
+            tmp_dir: origin_tmp_dir,
         },
         Testnet {
             container: dest_container,
             validator_network_ip: validator_network_config.1.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.1.ip_address.unwrap(),
+            http: dest_http,
+            ws: dest_ws,
+            tmp_dir: dest_tmp_dir,
         },
     ))
 }
@@ -220,11 +231,11 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
 async fn spinup_relayer(
     origin_testnet: &Testnet,
     dest_testnet: &Testnet,
-    mut env: GadgetConfiguration,
+    mut env: BlueprintEnvironment,
     tmp_dir: &Path,
 ) -> Result<()> {
     let data_dir = tmp_dir.join("relayer");
-    std::fs::create_dir_all(&data_dir)?;
+    fs::create_dir_all(&data_dir)?;
 
     let config_path = std::path::absolute(data_dir.join("agent-config.json"))?;
 
@@ -238,20 +249,22 @@ async fn spinup_relayer(
 
     // Give the relayer a new keystore
     let keystore_path = data_dir.join("keystore");
-    std::fs::create_dir_all(&keystore_path)?;
+    fs::create_dir_all(&keystore_path)?;
 
     env.keystore_uri = format!("{}", std::path::absolute(keystore_path)?.display());
     env.keystore()
         .generate_from_string::<SpEcdsa>("//Relayer")?;
 
-    let context = hyperlane_relayer_blueprint::HyperlaneContext::new(env, data_dir).await?;
-    let result = hyperlane_relayer_blueprint::set_config(
-        context,
-        Some(vec![format!("file://{}", config_path.display())]),
-        String::from("testnet1,testnet2"),
+    let context = hyperlane_relayer_blueprint_lib::HyperlaneContext::new(env, data_dir).await?;
+    let result = hyperlane_relayer_blueprint_lib::set_config(
+        Context(Arc::new(context)),
+        TangleArgs2(
+            Some(vec![format!("file://{}", config_path.display())].into()).into(),
+            String::from("testnet1,testnet2"),
+        ),
     )
     .await?;
-    assert_eq!(result, 0);
+    assert_eq!(result.0, 0);
 
     Ok(())
 }
@@ -307,7 +320,7 @@ sol!(
 );
 
 async fn mine_block(rpc_url: &str) -> Result<()> {
-    logging::debug!("Mining a block");
+    sdk::debug!("Mining a block");
     Command::new("cast")
         .args(["rpc", "anvil_mine", "1", "--rpc-url", rpc_url])
         .output()?;
@@ -318,7 +331,7 @@ async fn mine_block(rpc_url: &str) -> Result<()> {
     Ok(())
 }
 
-fn wallet_for(key: &str, rpc: &str) -> (EthereumWallet, RootProvider<BoxTransport>) {
+fn wallet_for(key: &str, rpc: &str) -> (EthereumWallet, RootProvider) {
     let wallet = EthereumWallet::new(PrivateKeySigner::from_str(key).unwrap());
 
     let provider = get_wallet_provider_http(rpc, wallet.clone());
@@ -360,17 +373,18 @@ async fn validator_test_inner() -> Result<()> {
 
     let harness = TangleTestHarness::setup(tempdir).await?;
 
-    let ctx = HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
-
-    let handler = SetConfigEventHandler::new(harness.env(), ctx).await?;
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+    let harness = harness.set_context(ctx);
 
     // Setup service
-    let (mut test_env, service_id, _) = harness.setup_services(false).await?;
-    test_env.add_job(handler);
+    let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
+    test_env.initialize().await?;
+    test_env
+        .add_job(blueprint::set_config.layer(TangleLayer))
+        .await;
 
-    tokio::spawn(async move {
-        test_env.run_runner().await.unwrap();
-    });
+    test_env.start().await?;
 
     // Pass the arguments
     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
@@ -381,18 +395,16 @@ async fn validator_test_inner() -> Result<()> {
     let origin_chain_name = to_field(String::from("testnet1"))?;
 
     // Execute job and verify result
-    let results = harness
-        .execute_job(
-            service_id,
-            0,
-            vec![config_urls, origin_chain_name],
-            vec![OutputValue::Uint64(0)],
-        )
+    let call = harness
+        .submit_job(service_id, 0, vec![config_urls, origin_chain_name])
         .await?;
 
+    let results = harness.wait_for_job_execution(0, call).await?;
+
+    harness.verify_job(&results, vec![OutputValue::Uint64(0)]);
     assert_eq!(results.service_id, service_id);
 
-    tracing::info!("Validator running, starting relayer...");
+    sdk::info!("Validator running, starting relayer...");
     spinup_relayer(
         &origin_testnet,
         &dest_testnet,
@@ -401,10 +413,10 @@ async fn validator_test_inner() -> Result<()> {
     )
     .await?;
 
-    tracing::info!("Relayer running, sending message...");
+    sdk::info!("Relayer running, sending message...");
     std::env::set_current_dir(temp_dir_path)?;
 
-    tracing::info!("Getting Testnet1's mailbox");
+    sdk::info!("Getting Testnet1's mailbox");
     let (_testnet1_wallet, testnet1_provider) = wallet_for(
         &hex::encode(harness.alloy_key.to_bytes()),
         &testnet1_host_rpc_url,
@@ -416,10 +428,10 @@ async fn validator_test_inner() -> Result<()> {
         &testnet2_host_rpc_url,
     );
 
-    tracing::info!("Deploying recipient");
+    sdk::info!("Deploying recipient");
     let recipient = TestRecipient::deploy(testnet2_provider.clone()).await?;
 
-    tracing::info!(
+    sdk::info!(
         "Dispatching message `{MESSAGE:?}` to recipient `{}`",
         recipient.address()
     );
@@ -429,7 +441,7 @@ async fn validator_test_inner() -> Result<()> {
         .await?;
     let receipt = tx.get_receipt().await?;
     if !receipt.status() {
-        logging::error!("Failed to dispatch message");
+        sdk::error!("Failed to dispatch message");
         return Err(Report::msg("Failed to dispatch message"));
     }
 
@@ -447,7 +459,7 @@ async fn validator_test_inner() -> Result<()> {
     };
 
     let message_id = hex::encode(message_id);
-    tracing::info!("Message ID: {message_id}");
+    sdk::info!("Message ID: {message_id}");
 
     mine_block(&testnet1_host_rpc_url).await?;
 
@@ -474,7 +486,7 @@ async fn validator_test_inner() -> Result<()> {
                     )));
                 }
 
-                logging::info!(
+                sdk::info!(
                     "Recipient at `{}` received message `{}`",
                     recipient.address(),
                     MESSAGE

@@ -1,18 +1,16 @@
 use blueprint_sdk as sdk;
 use bollard::network::ConnectNetworkOptions;
-use color_eyre::eyre::eyre;
 use color_eyre::Result;
-use dockworker::container::Container;
+use color_eyre::eyre::eyre;
 use dockworker::DockerBuilder;
-use sdk::config::GadgetConfiguration;
-use sdk::contexts::keystore::KeystoreContext;
+use dockworker::container::Container;
 use sdk::crypto::sp_core::SpEcdsa;
 use sdk::crypto::tangle_pair_signer::TanglePairSigner;
-use sdk::event_listeners::tangle::events::TangleEventListener;
-use sdk::event_listeners::tangle::services::{services_post_processor, services_pre_processor};
+use sdk::extract::Context;
 use sdk::keystore::backends::Backend;
-use sdk::macros::contexts::{ServicesContext, TangleClientContext};
-use sdk::tangle_subxt::tangle_testnet_runtime::api::services::events::JobCalled;
+use sdk::macros::context::{ServicesContext, TangleClientContext};
+use sdk::runner::config::BlueprintEnvironment;
+use sdk::tangle::extract::{List, Optional, TangleArgs2, TangleResult};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
@@ -26,24 +24,21 @@ pub fn default_data_dir() -> PathBuf {
 #[derive(Clone, TangleClientContext, ServicesContext)]
 pub struct HyperlaneContext {
     #[config]
-    pub env: GadgetConfiguration,
+    pub env: BlueprintEnvironment,
     data_dir: PathBuf,
     connection: Arc<DockerBuilder>,
     container: Arc<Mutex<Option<String>>>,
-    #[call_id]
-    call_id: Option<u64>,
 }
 
 const IMAGE: &str = "gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.2.0";
 impl HyperlaneContext {
-    pub async fn new(env: GadgetConfiguration, data_dir: PathBuf) -> Result<Self> {
+    pub async fn new(env: BlueprintEnvironment, data_dir: PathBuf) -> Result<Self> {
         let connection = DockerBuilder::new().await?;
         Ok(Self {
             env,
             data_dir,
             connection: Arc::new(connection),
             container: Arc::new(Mutex::new(None)),
-            call_id: None,
         })
     }
 
@@ -54,7 +49,7 @@ impl HyperlaneContext {
             return Ok(());
         }
 
-        tracing::info!("Spinning up new container");
+        blueprint_sdk::info!("Spinning up new container");
 
         // TODO: Bollard isn't pulling the image for some reason?
         let output = Command::new("docker").args(["pull", IMAGE]).output()?;
@@ -74,9 +69,9 @@ impl HyperlaneContext {
 
         let hyperlane_db_path = self.hyperlane_db_path();
         if !hyperlane_db_path.exists() {
-            tracing::warn!("Hyperlane DB does not exist, creating...");
+            blueprint_sdk::warn!("Hyperlane DB does not exist, creating...");
             std::fs::create_dir_all(&hyperlane_db_path)?;
-            tracing::info!("Hyperlane DB created at `{}`", hyperlane_db_path.display());
+            blueprint_sdk::info!("Hyperlane DB created at `{}`", hyperlane_db_path.display());
         }
 
         let mut binds = vec![format!("{}:/hyperlane_db", hyperlane_db_path.display())];
@@ -131,13 +126,10 @@ impl HyperlaneContext {
             let id = container.id().unwrap();
             self.connection
                 .get_client()
-                .connect_network(
-                    "hyperlane_validator_test_net",
-                    ConnectNetworkOptions {
-                        container: id,
-                        ..Default::default()
-                    },
-                )
+                .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
+                    container: id,
+                    ..Default::default()
+                })
                 .await?;
         }
 
@@ -158,7 +150,7 @@ impl HyperlaneContext {
     }
 
     async fn revert_configs(&self) -> Result<()> {
-        tracing::error!("Container failed to start with new configs, reverting");
+        blueprint_sdk::error!("Container failed to start with new configs, reverting");
 
         self.remove_existing_container().await?;
 
@@ -170,7 +162,7 @@ impl HyperlaneContext {
 
         let configs_path = self.agent_configs_path();
 
-        tracing::debug!(
+        blueprint_sdk::debug!(
             "Moving `{}` to `{}`",
             original_configs_path.display(),
             configs_path.display()
@@ -181,7 +173,7 @@ impl HyperlaneContext {
         let original_origin_chain_name_path = self.original_origin_chain_name_path();
         if original_origin_chain_name_path.exists() {
             let origin_chain_name_path = self.origin_chain_name_path();
-            tracing::debug!(
+            blueprint_sdk::debug!(
                 "Moving `{}` to `{}`",
                 original_origin_chain_name_path.display(),
                 origin_chain_name_path.display(),
@@ -196,7 +188,7 @@ impl HyperlaneContext {
     pub async fn remove_existing_container(&self) -> Result<()> {
         let mut container_id = self.container.lock().await;
         if let Some(container_id) = container_id.take() {
-            tracing::warn!("Removing existing container...");
+            blueprint_sdk::warn!("Removing existing container...");
             let mut c = Container::from_id(self.connection.get_client(), container_id).await?;
             c.stop().await?;
             c.remove(None).await?;
@@ -226,23 +218,17 @@ impl HyperlaneContext {
     }
 }
 
-#[sdk::job(
-    id = 0,
-    params(config_urls, origin_chain_name),
-    result(_),
-    event_listener(
-        listener = TangleEventListener<HyperlaneContext, JobCalled>,
-        pre_processor = services_pre_processor,
-        post_processor = services_post_processor,
-    ),
-)]
+pub const SET_CONFIG_JOB_ID: u8 = 0;
+
 pub async fn set_config(
-    ctx: HyperlaneContext,
-    config_urls: Option<Vec<String>>,
-    origin_chain_name: String,
-) -> Result<u64> {
+    Context(ctx): Context<HyperlaneContext>,
+    TangleArgs2(Optional(config_urls), origin_chain_name): TangleArgs2<
+        Optional<List<String>>,
+        String,
+    >,
+) -> Result<TangleResult<u64>> {
     let mut configs = Vec::new();
-    if let Some(config_urls) = config_urls {
+    if let Some(List(config_urls)) = config_urls {
         for config_url in config_urls {
             // https://github.com/seanmonstar/reqwest/issues/178
             let url = reqwest::Url::parse(&config_url)?;
@@ -267,9 +253,9 @@ pub async fn set_config(
     let configs_path = ctx.agent_configs_path();
     if configs_path.exists() {
         let orig_configs_path = ctx.original_agent_configs_path();
-        tracing::info!("Configs path exists, backing up.");
+        blueprint_sdk::info!("Configs path exists, backing up.");
         if orig_configs_path.exists() {
-            tracing::warn!("Removing old backup at {}", orig_configs_path.display());
+            blueprint_sdk::warn!("Removing old backup at {}", orig_configs_path.display());
             std::fs::remove_dir_all(&orig_configs_path)?;
         }
 
@@ -281,39 +267,39 @@ pub async fn set_config(
     if origin_chain_name_path.exists() {
         let orig_origin_chain_name_path = ctx.original_origin_chain_name_path();
         if orig_origin_chain_name_path.exists() {
-            tracing::warn!(
+            blueprint_sdk::warn!(
                 "Removing old backup at {}",
                 orig_origin_chain_name_path.display()
             );
             std::fs::remove_file(&orig_origin_chain_name_path)?;
         }
 
-        tracing::info!("Origin chain exists, backing up.");
+        blueprint_sdk::info!("Origin chain exists, backing up.");
         std::fs::rename(&origin_chain_name_path, orig_origin_chain_name_path)?;
     }
 
     std::fs::create_dir_all(&configs_path)?;
     if configs.is_empty() {
-        tracing::info!("No configs provided, using defaults");
+        blueprint_sdk::info!("No configs provided, using defaults");
     } else {
         // TODO: Limit number of configs?
         for (index, config) in configs.iter().enumerate() {
             std::fs::write(configs_path.join(format!("{index}.json")), config)?;
         }
-        tracing::info!("New configs written to: {}", configs_path.display());
+        blueprint_sdk::info!("New configs written to: {}", configs_path.display());
     }
 
     std::fs::write(&origin_chain_name_path, origin_chain_name)?;
-    tracing::info!(
+    blueprint_sdk::info!(
         "Origin chain written to: {}",
         origin_chain_name_path.display()
     );
 
     if let Err(e) = ctx.spinup_container().await {
         // Something went wrong spinning up the container, possibly bad config. Try to revert.
-        tracing::error!("{e}");
+        blueprint_sdk::error!("{e}");
         ctx.revert_configs().await?;
     }
 
-    Ok(0)
+    Ok(TangleResult(0))
 }
