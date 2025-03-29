@@ -1,66 +1,117 @@
-## Foundry
+# Hyperlane Validator Blueprint
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A modular slashing mechanism for Hyperlane validators on Tangle Network.
 
-Foundry consists of:
+## Architecture Overview
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+This system enables economic security for Hyperlane's cross-chain messaging by implementing provable fraud conditions with corresponding slashing penalties.
 
-## Documentation
+## ELI5: How It All Works
 
-https://book.getfoundry.sh/
+### What are Challengers?
 
-## Usage
+Challengers are specialized contracts that check if validators misbehaved. Think of them like security cameras with built-in fraud detection.
 
-### Build
+### The Complete Lifecycle:
 
-```shell
-$ forge build
-```
+1. **Operators Register:** Validators register for the Hyperlane Blueprint on Tangle.
 
-### Test
+2. **Customer Requests Instance:** A customer wants Hyperlane between Ethereum and Arbitrum. This creates instance #1 with service ID 1.
 
-```shell
-$ forge test
-```
+3. **Customer Selects Challengers:** During the service request, the customer chooses which challenger contracts will monitor their validator set. This allows customers to select their own security model.
 
-### Format
+4. **Operators Automatically Enrolled:** Selected validators are automatically enrolled in the customer's chosen challengers for that specific service instance.
 
-```shell
-$ forge fmt
-```
+5. **Validators Work:** Validators run their Hyperlane software, signing message roots that help messages go between Ethereum and Arbitrum.
 
-### Gas Snapshots
+6. **Something Goes Wrong:** Validator Bob signs two different message roots for the same checkpoint - signing two contradictory statements.
 
-```shell
-$ forge snapshot
-```
+7. **Someone Reports It:** Charlie (could be another validator, a watchtower, or anyone) notices Bob's double-signing. Charlie submits both signatures to the HyperlaneChallenger contract, saying "Bob cheated on instance #1."
 
-### Anvil
+8. **Verification & Delay:** The challenger contract checks if the proof is valid (did Bob really sign contradictory statements?). If yes, it records the challenge but waits for a delay period.
 
-```shell
-$ anvil
-```
+9. **Slashing Execution:** After the delay, anyone can call the challenger to actually execute the slash. The challenger tells the Tangle system "Slash Bob's stake for service ID 1."
 
-### Deploy
+10. **Funds Slashed:** Tangle takes the specified percentage of Bob's staked funds for that service.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+### Core Components
 
-### Cast
+#### Blueprint Pattern
 
-```shell
-$ cast <subcommand>
-```
+A blueprint represents a service template that can be instantiated multiple times:
 
-### Help
+- A single blueprint contract supports many service instances
+- Each service instance has its own unique service ID
+- The SlashingPrecompile uses service IDs to identify which stake to slash
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+#### HyperlaneValidatorBlueprint
+
+Acts as the central coordination point for the Hyperlane validator service. It:
+
+- Manages challenger enrollment/unenrollment for operators
+- Serves multiple service instances, each with their own validator set
+- Coordinates with the Tangle runtime for permissions
+- Processes service requests including customer's challenger selections
+
+#### Challengers
+
+Reusable contracts that verify specific types of validator fraud:
+
+- **SimpleChallenger**: Basic implementation for arbitrary slashing conditions
+- **HyperlaneChallenger**: Specialized for Hyperlane-specific fraud proofs (e.g., double-signed checkpoints)
+
+A single challenger can serve multiple service instances, allowing for efficient reuse of verification logic.
+
+### Service Request Flow
+
+When a customer wants to create a Hyperlane validator set:
+
+1. **Prepare Request Inputs:** The customer specifies:
+
+   - `challengers`: Array of challenger contract addresses for their security model
+   - `slashPercentages`: Optional customized slashing percentages for each challenger
+   - `originDomain`: The Hyperlane domain ID where the service will run
+   - `destinationDomains`: The Hyperlane domain IDs the service will connect to
+
+2. **Submit Request:** The customer submits their request with selected operators and the above parameters.
+
+3. **Blueprint Processing:** The blueprint:
+
+   - Registers the specified challengers for the service instance
+   - Configures custom slashing percentages if provided
+   - Stores domain information
+   - Automatically enrolls assigned operators in all selected challengers
+   - Returns a unique service ID to track the instance
+
+4. **Validators Begin Work:** The enrolled operators can now perform validator tasks for the customer's instance.
+
+### Security Model
+
+The system follows a trust-but-verify approach:
+
+- Validators operate freely until proven fraudulent
+- Watchtowers monitor for fraud without permission
+- Economic incentives align all actors to maintain system security
+- Service-specific slashing protects unrelated stakes
+- **Customer Choice:** Customers select their own security model by choosing challengers
+
+### Customer-Selected Security
+
+This architecture empowers customers to:
+
+1. **Choose Security Level:** Select challengers with different verification methods
+2. **Customize Slashing:** Set custom slashing percentages for different types of fraud
+3. **Balance Risk:** Select the right challengers for their specific use case requirements
+
+For example, a high-value DeFi application might select multiple stringent challengers with high slashing percentages, while a gaming application might select more lenient verification.
+
+## Usage Flow
+
+1. Deploy the blueprint once (managed by Tangle governance)
+2. Create multiple service instances, each with a unique service ID
+3. Customers select challengers during service request
+4. Validators are automatically enrolled with proper service IDs
+5. If fraud occurs, watchtowers submit proof to challengers
+6. Slashing is executed only against the relevant service ID
+
+This architecture provides flexibility while maintaining strong security guarantees across all Hyperlane validator deployments.
