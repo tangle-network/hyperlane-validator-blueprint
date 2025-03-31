@@ -1,34 +1,10 @@
-use super::config::ORIGIN_DOMAIN;
-use blueprint_sdk as sdk;
-use blueprint_sdk::alloy::network::EthereumWallet;
+use crate::utils::ORIGIN_DOMAIN;
 use blueprint_sdk::alloy::primitives::{Address, B256, Bytes, keccak256};
 use blueprint_sdk::alloy::providers::Provider;
-use blueprint_sdk::alloy::rpc::types::{TransactionInput, TransactionRequest};
+use blueprint_sdk::alloy::rpc::types::TransactionRequest;
 use blueprint_sdk::alloy::signers::Signer;
 use blueprint_sdk::alloy::signers::local::PrivateKeySigner;
-use blueprint_sdk::tangle::subxt_core::tx::signer;
 use color_eyre::Result;
-
-/// Encodes parameters for the EquivocationChallenger initialization
-///
-/// # Parameters
-/// * `domain` - Domain value for the challenger
-/// * `time_window` - Time window value in seconds
-pub fn encode_equivocation_challenger_params(domain: u32, time_window: u32) -> Bytes {
-    let mut params = Vec::new();
-    params.extend_from_slice(&domain.to_be_bytes());
-    params.extend_from_slice(&time_window.to_be_bytes());
-
-    Bytes::from(params)
-}
-
-/// Encodes parameters for the SimpleChallenger initialization
-///
-/// # Parameters
-/// * `slash_percentage` - Percentage to slash for violations (1-100)
-pub fn encode_simple_challenger_params(slash_percentage: u8) -> Bytes {
-    Bytes::from(vec![slash_percentage])
-}
 
 /// Creates a simple challenge proof for the SimpleChallenger
 ///

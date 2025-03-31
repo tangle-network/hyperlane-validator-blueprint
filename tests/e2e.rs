@@ -4,7 +4,7 @@ use color_eyre::Result;
 use futures::StreamExt;
 use hyperlane_validator_blueprint_lib as blueprint;
 use sdk::Job;
-use sdk::alloy::primitives::{Address, Bytes, address};
+use sdk::alloy::primitives::Bytes;
 use sdk::alloy::providers::Provider;
 use sdk::alloy::rpc::types::Filter;
 use sdk::alloy::sol;
@@ -13,7 +13,9 @@ use sdk::serde::to_field;
 use sdk::tangle::layers::TangleLayer;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
-use utils::config::DESTINATION_DOMAIN;
+use utils::DESTINATION_DOMAIN;
+use utils::MESSAGE;
+use utils::TESTNET1_MAILBOX;
 
 use std::time::Duration;
 
@@ -40,9 +42,6 @@ sol!(
     TestRecipient,
     "contracts/out/TestRecipient.sol/TestRecipient.json"
 );
-
-const TESTNET1_MAILBOX: Address = address!("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e");
-const MESSAGE: &str = "Hello";
 
 #[tokio::test]
 #[serial_test::serial]
@@ -143,7 +142,7 @@ async fn validator_test_inner() -> Result<()> {
 
     sdk::info!(
         "Dispatching message `{MESSAGE:?}` to recipient `{}`",
-        recipient.address()
+        recipient.address(),
     );
     let tx = testnet1_mailbox
         .dispatch_2(

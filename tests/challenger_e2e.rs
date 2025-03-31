@@ -1,66 +1,28 @@
 use blueprint_sdk as sdk;
-use blueprint_sdk::alloy::dyn_abi::abi;
-use blueprint_sdk::alloy::primitives::{B256, U256, keccak256};
-use blueprint_sdk::alloy::rlp::BytesMut;
-use blueprint_sdk::evm::util::get_wallet_provider_http;
-use bollard::container::RemoveContainerOptions;
-use bollard::models::EndpointSettings;
-use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
-use color_eyre::Report;
+use blueprint_sdk::alloy::primitives::U256;
 use color_eyre::Result;
-use dockworker::DockerBuilder;
-use futures::StreamExt;
-use hyperlane_relayer_blueprint_lib;
 use hyperlane_validator_blueprint_lib as blueprint;
 use sdk::Job;
-use sdk::alloy::network::EthereumWallet;
-use sdk::alloy::primitives::{Address, Bytes, address};
-use sdk::alloy::providers::{Provider, RootProvider};
-use sdk::alloy::rpc::types::Filter;
+use sdk::alloy::primitives::Bytes;
 use sdk::alloy::signers::local::PrivateKeySigner;
 use sdk::alloy::sol;
-use sdk::alloy::sol_types::SolEvent;
-use sdk::crypto::sp_core::SpEcdsa;
-use sdk::extract::Context;
-use sdk::keystore::backends::Backend;
-use sdk::runner::config::BlueprintEnvironment;
 use sdk::serde::to_field;
-use sdk::tangle::extract::TangleArgs2;
 use sdk::tangle::layers::TangleLayer;
-use sdk::testing::tempfile::{self, TempDir};
-use sdk::testing::utils::anvil::start_anvil_container;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
-use std::fs;
-use std::path::Path;
-use std::process::Command;
 use std::str::FromStr;
-use std::sync::Arc;
 use std::time::Duration;
-use testcontainers::ContainerAsync;
-use testcontainers::GenericImage;
 
-// Import our utility modules
 mod utils;
-use utils::blockchain::{
-    WalletIndex, increase_time, mine_block, provider, wallet_for, wallet_for_key,
-};
+use utils::blockchain::{increase_time, mine_block, provider, wallet_for_key};
 use utils::challenger::{
-    create_fraudulent_checkpoint_proof, create_simple_challenge_proof,
-    encode_equivocation_challenger_params, encode_simple_challenger_params,
-    verify_operator_enrollment,
+    create_fraudulent_checkpoint_proof, create_simple_challenge_proof, verify_operator_enrollment,
 };
 use utils::network::{
-    AGENT_CONFIG_TEMPLATE_PATH, TEST_ASSETS_PATH, TESTNET1_STATE_PATH, TESTNET2_STATE_PATH,
-    Testnet, cleanup_networks, new_agent_config, setup_temp_dir, spinup_anvil_testnets,
-    spinup_relayer,
+    TESTNET1_STATE_PATH, TESTNET2_STATE_PATH, cleanup_networks, setup_temp_dir,
+    spinup_anvil_testnets, spinup_relayer,
 };
-
-const TESTNET1_MAILBOX: Address = address!("0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e");
-const MESSAGE: &str = "Hello";
-const SLASH_PERCENTAGE: u8 = 10; // 10% slash percentage
-const ORIGIN_DOMAIN: u32 = 1337; // Example domain ID for origin chain
-const DESTINATION_DOMAIN: u32 = 31338; // Example domain ID for destination chain
+use utils::{ORIGIN_DOMAIN, SLASH_PERCENTAGE, TESTNET1_MAILBOX};
 
 // Define contract interfaces
 sol!(
