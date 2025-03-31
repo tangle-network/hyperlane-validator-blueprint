@@ -1,5 +1,4 @@
 //! Utility modules for testing
-#![allow(dead_code)]
 
 use blueprint_sdk::alloy::primitives::{Address, address};
 
