@@ -9,8 +9,8 @@ use sdk::alloy::providers::Provider;
 use sdk::alloy::rpc::types::Filter;
 use sdk::alloy::sol;
 use sdk::alloy::sol_types::SolEvent;
-use sdk::serde::to_field;
 use sdk::tangle::layers::TangleLayer;
+use sdk::tangle::serde::to_field;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
 use utils::DESTINATION_DOMAIN;
@@ -65,8 +65,8 @@ async fn validator_test_inner() -> Result<()> {
     let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
     let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
 
-    let origin_ports = origin_testnet.container.ports().await?;
-    let dest_ports = dest_testnet.container.ports().await?;
+    let origin_ports = origin_testnet.inner.container.ports().await?;
+    let dest_ports = dest_testnet.inner.container.ports().await?;
 
     let testnet1_host_rpc_url = format!(
         "http://127.0.0.1:{}",
@@ -85,17 +85,16 @@ async fn validator_test_inner() -> Result<()> {
 
     let harness = TangleTestHarness::setup(tempdir).await?;
 
-    let ctx =
-        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
-    let harness = harness.set_context(ctx);
-
     let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
     test_env.initialize().await?;
     test_env
         .add_job(blueprint::set_config.layer(TangleLayer))
         .await;
 
-    test_env.start().await?;
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+
+    test_env.start(ctx).await?;
 
     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
     let config_urls = to_field(Some(vec![format!(

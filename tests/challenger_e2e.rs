@@ -6,8 +6,8 @@ use sdk::Job;
 use sdk::alloy::primitives::Bytes;
 use sdk::alloy::signers::local::PrivateKeySigner;
 use sdk::alloy::sol;
-use sdk::serde::to_field;
 use sdk::tangle::layers::TangleLayer;
+use sdk::tangle::serde::to_field;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
 use std::str::FromStr;
@@ -100,17 +100,11 @@ async fn challenger_test_inner() -> Result<()> {
     let (origin_testnet, dest_testnet) =
         spinup_anvil_testnets(TESTNET1_STATE_PATH, TESTNET2_STATE_PATH).await?;
 
-    // The validator itself uses the IPs internal to the Docker network.
-    // When it comes time to relay the message, the command is run outside the Docker network,
-    // so we need to get both addresses.
-    let origin_http = &origin_testnet.http;
-    let dest_http = &dest_testnet.http;
-
     let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
     let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
 
-    let origin_ports = origin_testnet.container.ports().await?;
-    let dest_ports = dest_testnet.container.ports().await?;
+    let origin_ports = origin_testnet.inner.container.ports().await?;
+    let dest_ports = dest_testnet.inner.container.ports().await?;
 
     let testnet1_host_rpc_url = format!(
         "http://127.0.0.1:{}",
@@ -131,10 +125,6 @@ async fn challenger_test_inner() -> Result<()> {
     // Initialize test harness
     let harness = TangleTestHarness::setup(tempdir).await?;
 
-    let ctx =
-        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
-    let harness = harness.set_context(ctx);
-
     // Create a test environment and let tangle initialize it
     let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
 
@@ -146,8 +136,11 @@ async fn challenger_test_inner() -> Result<()> {
         .add_job(blueprint::set_config.layer(TangleLayer))
         .await;
 
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+
     // Start the test environment (this will start the config job)
-    test_env.start().await?;
+    test_env.start(ctx).await?;
 
     // Pass the arguments
     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
@@ -318,8 +311,8 @@ async fn validator_challenger_test_inner() -> Result<()> {
     let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
     let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
 
-    let origin_ports = origin_testnet.container.ports().await?;
-    let dest_ports = dest_testnet.container.ports().await?;
+    let origin_ports = origin_testnet.inner.container.ports().await?;
+    let dest_ports = dest_testnet.inner.container.ports().await?;
 
     let testnet1_host_rpc_url = format!(
         "http://127.0.0.1:{}",
@@ -329,9 +322,6 @@ async fn validator_challenger_test_inner() -> Result<()> {
         "http://127.0.0.1:{}",
         dest_ports.map_to_host_port_ipv4(8545).unwrap()
     );
-
-    let origin_http = &origin_testnet.http;
-    let dest_http = &dest_testnet.http;
 
     // Setup temporary directory
     let tempdir = setup_temp_dir(
@@ -344,9 +334,6 @@ async fn validator_challenger_test_inner() -> Result<()> {
     let harness = TangleTestHarness::setup(tempdir).await?;
 
     // Create hyperlane context
-    let ctx =
-        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
-    let harness = harness.set_context(ctx);
 
     // Setup services
     let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
@@ -355,7 +342,10 @@ async fn validator_challenger_test_inner() -> Result<()> {
         .add_job(blueprint::set_config.layer(TangleLayer))
         .await;
 
-    test_env.start().await?;
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+
+    test_env.start(ctx).await?;
 
     // Configure the validator with challenger
     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
@@ -400,7 +390,7 @@ async fn validator_challenger_test_inner() -> Result<()> {
     tokio::time::sleep(Duration::from_secs(2)).await;
 
     // Mine a block to trigger validator activities
-    mine_block(origin_http, Some(1)).await?;
+    mine_block(&origin_testnet.inner.http_endpoint, Some(1)).await?;
 
     // Test enrolling an operator in the challenger
     let service_id = 1u64;

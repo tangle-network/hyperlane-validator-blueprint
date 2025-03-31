@@ -3,7 +3,6 @@ use blueprint_sdk::alloy::network::EthereumWallet;
 use blueprint_sdk::alloy::network::NetworkWallet;
 use blueprint_sdk::alloy::primitives::Address;
 use blueprint_sdk::alloy::primitives::B256;
-use blueprint_sdk::alloy::primitives::Bytes;
 use blueprint_sdk::alloy::primitives::U256;
 use blueprint_sdk::alloy::providers::Provider;
 use blueprint_sdk::alloy::providers::ProviderBuilder;

@@ -124,7 +124,7 @@ pub async fn verify_operator_enrollment(
         .input(Bytes::from(data).into());
 
     // Call contract view function
-    let result = provider.call(&tx_request).await?;
+    let result = provider.call(tx_request).await?;
 
     // Parse result - true is represented as 1 in the last byte
     let is_enrolled = !result.is_empty() && result[result.len() - 1] == 1;

@@ -1,5 +1,5 @@
 use blueprint_sdk as sdk;
-use blueprint_sdk::keystore::backends::Backend;
+use blueprint_sdk::testing::chain_setup::anvil::AnvilTestnet;
 use bollard::container::RemoveContainerOptions;
 use bollard::models::EndpointSettings;
 use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
@@ -7,10 +7,11 @@ use color_eyre::Result;
 use dockworker::DockerBuilder;
 use sdk::crypto::sp_core::SpEcdsa;
 use sdk::extract::Context;
+use sdk::keystore::backends::Backend;
 use sdk::runner::config::BlueprintEnvironment;
 use sdk::tangle::extract::TangleArgs2;
+use sdk::testing::chain_setup::anvil::start_anvil_container;
 use sdk::testing::tempfile::{self, TempDir};
-use sdk::testing::utils::anvil::start_anvil_container;
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
@@ -28,12 +29,9 @@ pub const TEST_ASSETS_PATH: &str = "./test_assets";
 
 /// Represents a testnet running in a Docker container
 pub struct Testnet {
-    pub container: ContainerAsync<GenericImage>,
+    pub inner: AnvilTestnet,
     pub validator_network_ip: String,
     pub relayer_network_ip: String,
-    pub http: String,
-    pub ws: String,
-    pub tmp_dir: TempDir,
 }
 
 /// Spins up two Anvil testnets and connects them via Docker networks
@@ -105,46 +103,38 @@ pub async fn spinup_anvil_testnets(
     }
 
     let origin_state = fs::read_to_string(testnet1_state_path)?;
-    let (origin_container, origin_http, origin_ws, origin_tmp_dir) =
-        start_anvil_container(&origin_state, false).await;
+    let origin = start_anvil_container(&origin_state, false).await;
 
     let dest_state = fs::read_to_string(testnet2_state_path)?;
-    let (dest_container, dest_http, dest_ws, dest_tmp_dir) =
-        start_anvil_container(&dest_state, false).await;
+    let dest = start_anvil_container(&dest_state, false).await;
 
     let connection = DockerBuilder::new().await?;
     let validator_network_config = setup_network(
         &connection,
         VALIDATOR_NETWORK_NAME,
-        &origin_container,
-        &dest_container,
+        &origin.container,
+        &dest.container,
     )
     .await?;
 
     let relayer_network_config = setup_network(
         &connection,
         RELAYER_NETWORK_NAME,
-        &origin_container,
-        &dest_container,
+        &origin.container,
+        &dest.container,
     )
     .await?;
 
     Ok((
         Testnet {
-            container: origin_container,
+            inner: origin,
             validator_network_ip: validator_network_config.0.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.0.ip_address.unwrap(),
-            http: origin_http,
-            ws: origin_ws,
-            tmp_dir: origin_tmp_dir,
         },
         Testnet {
-            container: dest_container,
+            inner: dest,
             validator_network_ip: validator_network_config.1.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.1.ip_address.unwrap(),
-            http: dest_http,
-            ws: dest_ws,
-            tmp_dir: dest_tmp_dir,
         },
     ))
 }

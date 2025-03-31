@@ -24,23 +24,23 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address[] permittedCallers;
         uint64 ttl;
     }
-    
+
     // Structure to store approved operator information
     struct OperatorApproval {
         address operator;
         bytes publicKey;
         bool isApproved;
     }
-    
+
     // Mapping of serviceId to domain information
     mapping(uint256 => ServiceDomains) public serviceDomains;
-    
+
     // Mapping of requestId to request inputs
     mapping(uint64 => HyperlaneRequestInputs) private _pendingRequests;
-    
+
     // Mapping of requestId to approved operators
     mapping(uint64 => OperatorApproval[]) private _approvedOperators;
-    
+
     // Event emitted when a service instance is created
     event ServiceInstanceCreated(
         uint256 indexed serviceId,
@@ -50,14 +50,14 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address[] permittedCallers,
         uint64 ttl
     );
-    
+
     // Event emitted when an operator approves a service request
     event OperatorApproved(
         uint64 indexed requestId,
         address indexed operator,
         bytes publicKey
     );
-    
+
     // Event emitted when an operator rejects a service request
     event OperatorRejected(
         uint64 indexed requestId,
@@ -72,16 +72,16 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     function onRequest(ServiceOperators.RequestParams calldata params) override external payable virtual onlyFromMaster {
         // Decode and store the blueprint-specific request inputs
         HyperlaneRequestInputs memory blueprintInputs = abi.decode(params.requestInputs, (HyperlaneRequestInputs));
-        
+
         // Validate inputs
         require(blueprintInputs.challengers.length > 0, "HVB: no challengers specified");
         require(blueprintInputs.originDomain > 0, "HVB: invalid origin domain");
         require(blueprintInputs.destinationDomains.length > 0, "HVB: no destination domains specified");
-        
+
         // Store request inputs for processing during service initialization
         _pendingRequests[params.requestId] = blueprintInputs;
     }
-    
+
     /**
      * @notice Called when an operator approves a service request
      * @dev Tracks which operators have approved each request
@@ -93,7 +93,7 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         ServiceOperators.OperatorPreferences calldata operator,
         uint64 requestId,
         uint8 restakingPercent
-    ) external payable override onlyFromMaster {        
+    ) external payable override onlyFromMaster {
         // Store the approval
         address operatorAddress = _operatorAddressFromPublicKey(operator.ecdsaPublicKey);
         _approvedOperators[requestId].push(OperatorApproval({
@@ -101,10 +101,10 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             publicKey: operator.ecdsaPublicKey,
             isApproved: true
         }));
-        
+
         emit OperatorApproved(requestId, operatorAddress, operator.ecdsaPublicKey);
     }
-    
+
     /**
      * @notice Called when an operator rejects a service request
      * @dev Tracks which operators have rejected each request
@@ -118,7 +118,7 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         // We could track rejections, but for now we just emit an event
         emit OperatorRejected(requestId, _operatorAddressFromPublicKey(operator.ecdsaPublicKey));
     }
-    
+
     /**
      * @notice Called when a service is initialized with a specific service ID
      * @dev Processes the stored request parameters and sets up the service
@@ -138,32 +138,32 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         // Get the stored request inputs
         HyperlaneRequestInputs memory inputs = _pendingRequests[requestId];
         require(inputs.originDomain > 0, "HVB: no pending request found");
-        
+
         // Process challengers
         for (uint256 i = 0; i < inputs.challengers.length; i++) {
             address challenger = inputs.challengers[i];
-            
+
             // Validate the challenger is registered
             require(isRegisteredChallenger(challenger), "HVB: invalid challenger");
-            
+
             // Register the challenger for this service instance
             _registerChallengerForService(serviceId, challenger);
         }
-        
+
         // Enroll all approved operators in all challengers for this service
         OperatorApproval[] memory approvals = _approvedOperators[requestId];
         for (uint256 i = 0; i < approvals.length; i++) {
             if (approvals[i].isApproved) {
                 address operator = approvals[i].operator;
                 bytes memory publicKey = approvals[i].publicKey;
-                
+
                 // Enroll this operator in all registered challengers for this service
                 for (uint256 i = 0; i < inputs.challengers.length; i++) {
                     IRemoteChallenger(inputs.challengers[i]).enrollOperator(serviceId, operator, publicKey);
                 }
             }
         }
-        
+
         // Store domain information and service parameters
         serviceDomains[serviceId] = ServiceDomains({
             originDomain: inputs.originDomain,
@@ -172,22 +172,22 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             permittedCallers: permittedCallers,
             ttl: ttl
         });
-        
+
         // Clean up the pending request and approvals
         delete _pendingRequests[requestId];
         delete _approvedOperators[requestId];
-        
+
         // Emit event for service instance creation
         emit ServiceInstanceCreated(
-            serviceId, 
-            inputs.challengers, 
+            serviceId,
+            inputs.challengers,
             inputs.originDomain,
             owner,
             permittedCallers,
             ttl
         );
     }
-    
+
     /**
      * @notice Implementation of abstract function from ChallengerEnrollment
      * @param publicKey The public key to convert
