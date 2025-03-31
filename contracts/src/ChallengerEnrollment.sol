@@ -27,29 +27,6 @@ abstract contract ChallengerEnrollment is BlueprintServiceManagerBase, Ownable {
     event ChallengerRegisteredForService(uint256 indexed serviceId, address indexed challenger);
 
     /**
-     * @notice Registers a new challenger contract.
-     * @param challenger The address of the challenger contract.
-     */
-    function registerChallenger(address challenger) external onlyOwner {
-        require(challenger != address(0), "CE: challenger cannot be zero address");
-        require(!registeredChallengers[challenger], "CE: challenger already registered");
-        
-        registeredChallengers[challenger] = true;
-        
-        emit ChallengerRegistered(challenger);
-    }
-    
-    /**
-     * @notice Unregisters a challenger contract.
-     * @param challenger The address of the challenger contract.
-     */
-    function unregisterChallenger(address challenger) external onlyOwner {
-        require(registeredChallengers[challenger], "CE: challenger not registered");
-        registeredChallengers[challenger] = false;
-        emit ChallengerUnregistered(challenger);
-    }
-
-    /**
      * @notice Registers a challenger for a specific service instance.
      * @param serviceId The service ID.
      * @param challenger The challenger address.
@@ -66,15 +43,6 @@ abstract contract ChallengerEnrollment is BlueprintServiceManagerBase, Ownable {
         // Add to the service challengers
         _serviceChallengers[serviceId].push(challenger);
         emit ChallengerRegisteredForService(serviceId, challenger);
-    }
-
-    /**
-     * @notice Gets all challengers registered for a specific service instance.
-     * @param serviceId The service ID.
-     * @return Array of challenger addresses for the service.
-     */
-    function getServiceChallengers(uint256 serviceId) public view returns (address[] memory) {
-        return _serviceChallengers[serviceId];
     }
 
     /**
