@@ -14,7 +14,6 @@ use sdk::testing::utils::anvil::start_anvil_container;
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
-use std::time::Duration;
 use testcontainers::ContainerAsync;
 use testcontainers::GenericImage;
 

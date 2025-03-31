@@ -13,6 +13,7 @@ use sdk::serde::to_field;
 use sdk::tangle::layers::TangleLayer;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
+use utils::config::DESTINATION_DOMAIN;
 
 use std::time::Duration;
 
@@ -145,7 +146,11 @@ async fn validator_test_inner() -> Result<()> {
         recipient.address()
     );
     let tx = testnet1_mailbox
-        .dispatch_2(31338, recipient.address().into_word(), Bytes::from(MESSAGE))
+        .dispatch_2(
+            DESTINATION_DOMAIN,
+            recipient.address().into_word(),
+            Bytes::from(MESSAGE),
+        )
         .send()
         .await?;
     let receipt = tx.get_receipt().await?;
