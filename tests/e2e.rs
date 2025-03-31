@@ -44,6 +44,7 @@ const TESTNET1_MAILBOX: Address = address!("0xB7f8BC63BbcaD18155201308C8f3540b07
 const MESSAGE: &str = "Hello";
 
 #[tokio::test]
+#[serial_test::serial]
 async fn validator_test() -> Result<()> {
     setup_log();
 

@@ -104,6 +104,7 @@ sol!(
 );
 
 #[tokio::test]
+#[serial_test::serial]
 async fn challenger_test() -> Result<()> {
     setup_log();
 
@@ -118,6 +119,7 @@ async fn challenger_test() -> Result<()> {
 }
 
 #[tokio::test]
+#[serial_test::serial]
 async fn validator_challenger_test() -> Result<()> {
     setup_log();
 

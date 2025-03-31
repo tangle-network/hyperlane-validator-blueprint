@@ -19,6 +19,7 @@ hex.workspace = true
 reqwest.workspace = true
 dockworker = { workspace = true, features = ["docker"] }
 bollard.workspace = true
+serial_test = "3.2.0"
 
 [dev-dependencies]
 blueprint-sdk = { workspace = true, features = ["testing", "evm"] }
