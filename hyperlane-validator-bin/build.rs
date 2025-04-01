@@ -1,6 +1,7 @@
 use blueprint_sdk::build;
 use blueprint_sdk::tangle::blueprint;
-use hyperlane_validator_blueprint_lib::set_config;
+use blueprint_sdk::tangle::extract::TangleArg;
+use hyperlane_validator_blueprint_lib::{HyperlaneRequestInputs, set_config};
 use std::path::Path;
 use std::process;
 
@@ -16,6 +17,7 @@ fn main() {
         name: "experiment",
         master_manager_revision: "Latest",
         manager: { Evm = "HyperlaneValidatorBlueprint" },
+        request_params: TangleArg::<HyperlaneRequestInputs>,
         jobs: [set_config]
     };
 

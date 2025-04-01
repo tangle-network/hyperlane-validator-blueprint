@@ -1,4 +1,6 @@
 use blueprint_sdk as sdk;
+use blueprint_sdk::alloy::primitives::Address;
+use blueprint_sdk::alloy::primitives::private::serde::Serialize;
 use bollard::network::ConnectNetworkOptions;
 use color_eyre::Result;
 use color_eyre::eyre::eyre;
@@ -15,6 +17,14 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+
+#[derive(Serialize, Default)]
+#[serde(crate = "blueprint_sdk::crypto::tangle_pair_signer::sp_core::serde")]
+pub struct HyperlaneRequestInputs {
+    pub challengers: List<Address>,
+    pub origin_domain: u32,
+    pub destination_domains: List<u32>,
+}
 
 pub fn default_data_dir() -> PathBuf {
     const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");

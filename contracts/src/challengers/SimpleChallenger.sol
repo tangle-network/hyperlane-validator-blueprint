@@ -19,21 +19,18 @@ contract SimpleChallenger is Challenger {
     ) Challenger(_slashPercentage) {}
 
     /**
-     * @notice Validates a proof of misbehavior
-     * @param operator The address of the operator
-     * @param proofData The proof data for the challenge
-     * @return valid Whether the proof is valid
+     * @inheritdoc Challenger
      */
-    function _validateProof(uint256, address, bytes calldata proofData) internal override pure returns (bool) {
+    function _validateProof(uint256, address, bytes calldata _proofData) internal override pure returns (bool) {
         // This is a placeholder for actual validation logic
         // In a real implementation, this would analyze the proof data to verify misbehavior
-        
+
         // Example: Check if the proof is a signed message admitting fault
         // bytes32 messageHash = keccak256(abi.encodePacked("I misbehaved", operator));
         // address signer = messageHash.toEthSignedMessageHash().recover(proofData);
         // return signer == operator;
-        
+
         // For this simple implementation, we'll assume all proofs with non-zero length are valid
-        return proofData.length > 0;
+        return _proofData.length > 0;
     }
 } 

@@ -1,14 +1,18 @@
+use blueprint::HyperlaneRequestInputs;
 use blueprint_sdk as sdk;
-use blueprint_sdk::alloy::primitives::U256;
+use blueprint_sdk::alloy::primitives::Address;
 use color_eyre::Result;
 use hyperlane_validator_blueprint_lib as blueprint;
 use sdk::Job;
 use sdk::alloy::primitives::Bytes;
+use sdk::alloy::primitives::U256;
 use sdk::alloy::signers::local::PrivateKeySigner;
 use sdk::alloy::sol;
+use sdk::tangle::extract::List;
 use sdk::tangle::layers::TangleLayer;
 use sdk::tangle::serde::to_field;
 use sdk::testing::utils::setup_log;
+use sdk::testing::utils::tangle::harness::SetupServicesOpts;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
 use std::str::FromStr;
 use std::time::Duration;
@@ -126,7 +130,17 @@ async fn challenger_test_inner() -> Result<()> {
     let harness = TangleTestHarness::setup(tempdir).await?;
 
     // Create a test environment and let tangle initialize it
-    let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
+    let (mut test_env, service_id, _) = harness
+        .setup_services_with_options::<1>(SetupServicesOpts {
+            exit_after_registration: false,
+            registration_args: Default::default(),
+            request_args: vec![to_field(HyperlaneRequestInputs {
+                challengers: List::from(vec![Address::default()]),
+                origin_domain: 1,
+                destination_domains: List::from(vec![2]),
+            })?],
+        })
+        .await?;
 
     // Initialize the test environment (load the contracts)
     test_env.initialize().await?;
