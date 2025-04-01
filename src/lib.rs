@@ -21,9 +21,9 @@ use tokio::sync::Mutex;
 #[derive(Serialize, Default)]
 #[serde(crate = "blueprint_sdk::crypto::tangle_pair_signer::sp_core::serde")]
 pub struct HyperlaneRequestInputs {
-    pub challengers: List<Address>,
     pub origin_domain: u32,
-    pub destination_domains: List<u32>,
+    pub destination_domain: u32,
+    pub challengers: List<Address>,
 }
 
 pub fn default_data_dir() -> PathBuf {

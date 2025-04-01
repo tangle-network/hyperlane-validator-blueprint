@@ -11,25 +11,24 @@ import "./ChallengerEnrollment.sol";
  */
 contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     struct HyperlaneRequestInputs {
-        address[] challengers;
         uint32 originDomain;
-        uint32[] destinationDomains;
+        uint32 destinationDomain;
+        address[] challengers;
     }
 
     // Structure to store domain information for services
     struct ServiceDomains {
         uint32 originDomain;
-        uint32[] destinationDomains;
+        uint32 destinationDomain;
         address owner;
-        address[] permittedCallers;
         uint64 ttl;
+        address[] permittedCallers;
     }
 
     // Structure to store approved operator information
     struct OperatorApproval {
         address operator;
         bytes publicKey;
-        bool isApproved;
     }
 
     // Mapping of serviceId to domain information
@@ -40,6 +39,9 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
 
     // Mapping of requestId to approved operators
     mapping(uint64 => OperatorApproval[]) private _approvedOperators;
+
+    // Mapping of serviceId to operators
+    mapping(uint256 => OperatorApproval[]) private _operators;
 
     // Event emitted when a service instance is created
     event ServiceInstanceCreated(
@@ -64,6 +66,17 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address indexed operator
     );
 
+    // Modifier to ensure the caller is a permitted caller
+    modifier onlyPermittedCaller(uint256 serviceId) {
+        // Check if the caller is in the permitted caller list
+        for (uint256 i = 0; i < serviceDomains[serviceId].permittedCallers.length; i++) {
+            if (serviceDomains[serviceId].permittedCallers[i] == msg.sender) {
+                return;
+            }
+        }
+        _;
+    }
+
     /**
      * @notice Handles incoming service requests
      * @dev Stores request parameters for later processing during service initialization
@@ -72,11 +85,6 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     function onRequest(ServiceOperators.RequestParams calldata params) override external payable virtual onlyFromMaster {
         // Decode and store the blueprint-specific request inputs
         HyperlaneRequestInputs memory blueprintInputs = abi.decode(params.requestInputs, (HyperlaneRequestInputs));
-
-        // Validate inputs
-        require(blueprintInputs.challengers.length > 0, "HVB: no challengers specified");
-        require(blueprintInputs.originDomain > 0, "HVB: invalid origin domain");
-        require(blueprintInputs.destinationDomains.length > 0, "HVB: no destination domains specified");
 
         // Store request inputs for processing during service initialization
         _pendingRequests[params.requestId] = blueprintInputs;
@@ -98,8 +106,7 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address operatorAddress = _operatorAddressFromPublicKey(operator.ecdsaPublicKey);
         _approvedOperators[requestId].push(OperatorApproval({
             operator: operatorAddress,
-            publicKey: operator.ecdsaPublicKey,
-            isApproved: true
+            publicKey: operator.ecdsaPublicKey
         }));
 
         emit OperatorApproved(requestId, operatorAddress, operator.ecdsaPublicKey);
@@ -139,21 +146,22 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         // Enroll all approved operators in all challengers for this service
         OperatorApproval[] memory approvals = _approvedOperators[requestId];
         for (uint256 i = 0; i < approvals.length; i++) {
-            if (approvals[i].isApproved) {
-                address operator = approvals[i].operator;
-                bytes memory publicKey = approvals[i].publicKey;
+            address operator = approvals[i].operator;
+            bytes memory publicKey = approvals[i].publicKey;
 
-                // Enroll this operator in all registered challengers for this service
-                for (uint256 i = 0; i < inputs.challengers.length; i++) {
-                    IRemoteChallenger(inputs.challengers[i]).enrollOperator(serviceId, operator, publicKey);
-                }
+            // Add the operator to the service
+            _operators[serviceId].push(approvals[i]);
+
+            // Enroll this operator in all registered challengers for this service
+            for (uint256 j = 0; j < inputs.challengers.length; j++) {
+                IRemoteChallenger(inputs.challengers[j]).enrollOperator(serviceId, operator, publicKey);
             }
         }
 
         // Store domain information and service parameters
         serviceDomains[serviceId] = ServiceDomains({
             originDomain: inputs.originDomain,
-            destinationDomains: inputs.destinationDomains,
+            destinationDomain: inputs.destinationDomain,
             owner: owner,
             permittedCallers: permittedCallers,
             ttl: ttl
@@ -172,6 +180,13 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             permittedCallers,
             ttl
         );
+    }
+
+    function addChallenger(uint256 serviceId, address challenger) external onlyPermittedCaller(serviceId) {
+        _registerChallengerForService(serviceId, challenger);
+        for (uint256 i = 0; i < _operators[serviceId].length; i++) {
+            IRemoteChallenger(challenger).enrollOperator(serviceId, _operators[serviceId][i].operator, _operators[serviceId][i].publicKey);
+        }
     }
 
     /**
