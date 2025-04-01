@@ -24,7 +24,7 @@ contract SimpleChallenger is Challenger {
      * @param proofData The proof data for the challenge
      * @return valid Whether the proof is valid
      */
-    function _validateProof(uint256 serviceId, address operator, bytes calldata proofData) internal override pure returns (bool) {
+    function _validateProof(uint256, address, bytes calldata proofData) internal override pure returns (bool) {
         // This is a placeholder for actual validation logic
         // In a real implementation, this would analyze the proof data to verify misbehavior
         

@@ -106,20 +106,6 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     }
 
     /**
-     * @notice Called when an operator rejects a service request
-     * @dev Tracks which operators have rejected each request
-     * @param operator The operator preferences data
-     * @param requestId The request ID being rejected
-     */
-    function onReject(
-        ServiceOperators.OperatorPreferences calldata operator,
-        uint64 requestId
-    ) external override onlyFromMaster {
-        // We could track rejections, but for now we just emit an event
-        emit OperatorRejected(requestId, _operatorAddressFromPublicKey(operator.ecdsaPublicKey));
-    }
-
-    /**
      * @notice Called when a service is initialized with a specific service ID
      * @dev Processes the stored request parameters and sets up the service
      * @param requestId The original request ID
