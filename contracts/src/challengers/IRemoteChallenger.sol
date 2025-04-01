@@ -24,4 +24,10 @@ interface IRemoteChallenger {
     /// @param serviceId The service ID to unenroll from
     /// @param operator The address of the operator to unenroll
     function unenrollOperator(uint256 serviceId, address operator) external;
+
+    /// @notice Registers mailbox addresses for a specific service
+    /// @param serviceId The service ID to register the mailbox for
+    /// @param mailboxAddress1 The address of the mailbox
+    /// @param mailboxAddress2 The address of the mailbox   
+    function registerServiceMailbox(uint256 serviceId, address mailboxAddress1, address mailboxAddress2) external;
 }

@@ -13,6 +13,8 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     struct HyperlaneRequestInputs {
         uint32 originDomain;
         uint32 destinationDomain;
+        address originMailboxAddress;
+        address destinationMailboxAddress;
         address[] challengers;
     }
 
@@ -155,6 +157,11 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             // Enroll this operator in all registered challengers for this service
             for (uint256 j = 0; j < inputs.challengers.length; j++) {
                 IRemoteChallenger(inputs.challengers[j]).enrollOperator(serviceId, operator, publicKey);
+                IRemoteChallenger(inputs.challengers[j]).registerServiceMailbox(
+                    serviceId,
+                    inputs.originMailboxAddress,
+                    inputs.destinationMailboxAddress
+                );
             }
         }
 

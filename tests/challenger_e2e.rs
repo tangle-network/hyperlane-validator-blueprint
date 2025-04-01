@@ -137,7 +137,9 @@ async fn challenger_test_inner() -> Result<()> {
             request_args: vec![to_field(HyperlaneRequestInputs {
                 challengers: List::from(vec![Address::default()]),
                 origin_domain: 1,
-                destination_domains: List::from(vec![2]),
+                destination_domain: 2,
+                origin_mailbox_address: TESTNET1_MAILBOX,
+                destination_mailbox_address: TESTNET2_MAILBOX,
             })?],
         })
         .await?;
@@ -228,8 +230,15 @@ async fn challenger_test_inner() -> Result<()> {
     sdk::info!("Creating fraudulent checkpoint proof for testing...");
     // Convert the key to a PrivateKeySigner for the create_fraudulent_checkpoint_proof function
     let signer = PrivateKeySigner::from_str(deployer_key).unwrap();
-    let checkpoint_proof =
-        create_fraudulent_checkpoint_proof(&signer, operator_address, service_id as u32, 1).await?;
+    let checkpoint_proof = create_fraudulent_checkpoint_proof(
+        &signer,
+        operator_address,
+        service_id as u32,
+        1,
+        TESTNET1_MAILBOX,
+        TESTNET2_MAILBOX,
+    )
+    .await?;
 
     // Submit challenge to the EquivocationChallenger
     sdk::info!("Submitting equivocation challenge...");
@@ -260,6 +269,8 @@ async fn challenger_test_inner() -> Result<()> {
         operator_address,
         service_id as u32,
         Some("Test challenge - failed to perform validation duties"),
+        TESTNET1_MAILBOX,
+        TESTNET2_MAILBOX,
     );
 
     let tx = simple_challenger
@@ -423,6 +434,8 @@ async fn validator_challenger_test_inner() -> Result<()> {
         operator_address,
         service_id as u32,
         Some("Testing validator challenger system"),
+        TESTNET1_MAILBOX,
+        TESTNET2_MAILBOX,
     );
 
     let tx = simple_challenger

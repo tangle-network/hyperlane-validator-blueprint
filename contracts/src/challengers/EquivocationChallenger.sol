@@ -43,6 +43,18 @@ contract EquivocationChallenger is Challenger {
     }
 
     /**
+     * @notice Structure for an ECDSA signature with explicit r, s, v components
+     * @param r The first 32 bytes of the signature
+     * @param s The second 32 bytes of the signature
+     * @param v The recovery id byte
+     */
+    struct ECDSASignature {
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+    }
+
+    /**
      * @dev Constructor to initialize the challenger contract
      * @param _slashPercentage The default slashing percentage (0-100)
      * @param _originDomain The domain ID where the merkle tree is located
@@ -61,11 +73,10 @@ contract EquivocationChallenger is Challenger {
 
     /**
      * @notice Validates a proof of misbehavior for Hyperlane validators
-     * @dev The proof data must be ABI-encoded as (Checkpoint, bytes, Checkpoint, bytes)
-     *      representing (checkpoint1, signature1, checkpoint2, signature2)
+     * @dev The proof data must be ABI-encoded with explicit signature components (r,s,v)
      * @param serviceId The service ID the challenge is for
      * @param operator The address of the operator
-     * @param proofData The encoded proof data containing two checkpoints and signatures
+     * @param proofData The encoded proof data containing two checkpoints, signatures, and the mailbox addresses
      * @return valid Whether the proof is valid
      */
     function _validateProof(uint256 serviceId, address operator, bytes calldata proofData) internal override returns (bool) {
@@ -86,10 +97,30 @@ contract EquivocationChallenger is Challenger {
 
         try this.decodeProofData(proofData) returns (
             Checkpoint memory checkpoint1,
-            bytes memory signature1,
+            ECDSASignature memory signature1,
             Checkpoint memory checkpoint2,
-            bytes memory signature2
+            ECDSASignature memory signature2,
+            address mailboxAddress1,
+            address mailboxAddress2
         ) {
+            // Verify the mailbox addresses match those registered for this service
+            address[2] memory registeredMailboxes = serviceMailboxes[serviceId];
+            
+            if (registeredMailboxes[0] == address(0) || registeredMailboxes[1] == address(0)) {
+                // No mailboxes registered for this service
+                return false;
+            }
+            
+            // Check if the provided mailbox addresses match the registered ones (order doesn't matter)
+            bool mailboxesMatch = (
+                (mailboxAddress1 == registeredMailboxes[0] && mailboxAddress2 == registeredMailboxes[1]) ||
+                (mailboxAddress1 == registeredMailboxes[1] && mailboxAddress2 == registeredMailboxes[0])
+            );
+            
+            if (!mailboxesMatch) {
+                return false;
+            }
+
             // Verify both checkpoints are for the same domain and merkle tree hook
             if (checkpoint1.mailboxDomain != originDomain || 
                 checkpoint2.mailboxDomain != originDomain) {
@@ -137,30 +168,56 @@ contract EquivocationChallenger is Challenger {
      * @return signature1 The signature for the first checkpoint
      * @return checkpoint2 The second checkpoint
      * @return signature2 The signature for the second checkpoint
+     * @return mailboxAddress1 First mailbox address for verification
+     * @return mailboxAddress2 Second mailbox address for verification
      */
     function decodeProofData(bytes calldata proofData) external pure returns (
         Checkpoint memory checkpoint1,
-        bytes memory signature1,
+        ECDSASignature memory signature1,
         Checkpoint memory checkpoint2,
-        bytes memory signature2
+        ECDSASignature memory signature2,
+        address mailboxAddress1,
+        address mailboxAddress2
     ) {
-        (checkpoint1, signature1, checkpoint2, signature2) = abi.decode(
+        (
+            checkpoint1,
+            signature1.r, signature1.s, signature1.v,
+            checkpoint2,
+            signature2.r, signature2.s, signature2.v,
+            mailboxAddress1,
+            mailboxAddress2
+        ) = abi.decode(
             proofData,
-            (Checkpoint, bytes, Checkpoint, bytes)
+            (
+                Checkpoint,
+                bytes32, bytes32, uint8,
+                Checkpoint,
+                bytes32, bytes32, uint8,
+                address,
+                address
+            )
         );
-        return (checkpoint1, signature1, checkpoint2, signature2);
+        
+        return (
+            checkpoint1,
+            signature1,
+            checkpoint2,
+            signature2,
+            mailboxAddress1,
+            mailboxAddress2
+        );
     }
 
     /**
      * @notice Verifies a signature for a checkpoint against a public key
      * @param checkpoint The checkpoint data
-     * @param signature The signature to verify
+     * @param signature The ECDSA signature with r, s, v components
      * @param publicKey The public key to verify against
      * @return valid Whether the signature is valid
      */
     function verifySignature(
         Checkpoint memory checkpoint,
-        bytes memory signature,
+        ECDSASignature memory signature,
         bytes memory publicKey
     ) internal pure returns (bool) {
         bytes32 checkpointHash = keccak256(
@@ -174,7 +231,14 @@ contract EquivocationChallenger is Challenger {
         
         // For ECDSA signatures (Ethereum style)
         bytes32 prefixedHash = checkpointHash.toEthSignedMessageHash();
-        address recoveredSigner = ECDSA.recover(prefixedHash, signature);
+        
+        // Recover the signer address from explicit r, s, v components
+        address recoveredSigner = ecrecover(
+            prefixedHash,
+            signature.v,
+            signature.r,
+            signature.s
+        );
         
         // Derive the address from the public key and compare
         address derivedAddress = address(

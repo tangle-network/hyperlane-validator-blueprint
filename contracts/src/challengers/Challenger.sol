@@ -25,6 +25,9 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
     /// @notice Maps serviceId → operator → public key
     mapping(uint256 => mapping(address => bytes)) public operatorPublicKeys;
     
+    /// @notice Maps serviceId → mailbox addresses
+    mapping(uint256 => address[2]) public serviceMailboxes;
+
     /// @notice Emitted when an operator is enrolled for a service
     event OperatorEnrolled(uint256 indexed serviceId, address indexed operator, bytes publicKey);
     
@@ -33,6 +36,9 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
     
     /// @notice Emitted when a challenge is submitted and processed
     event ChallengeProcessed(uint256 indexed serviceId, address indexed operator, address indexed challenger, uint8 slashPercentage);
+
+    /// @notice Emitted when a mailbox is registered for a service
+    event ServiceMailboxRegistered(uint256 indexed serviceId, address indexed mailboxAddress1, address indexed mailboxAddress2);
 
     /**
      * @dev Constructor to initialize the challenger contract
@@ -102,6 +108,20 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
         SLASHING_PRECOMPILE.slash(offender, serviceId, defaultSlashPercentage);
         
         emit ChallengeProcessed(serviceId, operator, msg.sender, defaultSlashPercentage);
+    }
+
+    /**
+     * @notice Registers mailbox addresses for a specific service
+     * @param serviceId The service ID to register the mailbox for
+     * @param mailboxAddress1 The address of the mailbox
+     * @param mailboxAddress2 The address of the mailbox   
+     */
+    function registerServiceMailbox(uint256 serviceId, address mailboxAddress1, address mailboxAddress2) external onlyFromRootChain {
+        require(mailboxAddress1 != address(0) && mailboxAddress2 != address(0), "Challenger: mailbox addresses cannot be zero addresses");
+        require(mailboxAddress1 != mailboxAddress2, "Challenger: mailbox addresses cannot be the same");
+
+        serviceMailboxes[serviceId] = [mailboxAddress1, mailboxAddress2];
+        emit ServiceMailboxRegistered(serviceId, mailboxAddress1, mailboxAddress2);
     }
 
     /**

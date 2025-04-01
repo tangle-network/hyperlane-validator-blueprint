@@ -23,6 +23,8 @@ use tokio::sync::Mutex;
 pub struct HyperlaneRequestInputs {
     pub origin_domain: u32,
     pub destination_domain: u32,
+    pub origin_mailbox_address: Address,
+    pub destination_mailbox_address: Address,
     pub challengers: List<Address>,
 }
 
