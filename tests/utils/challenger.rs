@@ -33,8 +33,8 @@ pub fn create_simple_challenge_proof(
     proof.extend_from_slice(&reason_bytes);
 
     // Add the mailbox addresses at the end for verification
-    proof.extend_from_slice(mailbox_address1.as_slice());
-    proof.extend_from_slice(mailbox_address2.as_slice());
+    proof.extend_from_slice(origin_mailbox_address.as_slice());
+    proof.extend_from_slice(destination_mailbox_address.as_slice());
 
     Bytes::from(proof)
 }
