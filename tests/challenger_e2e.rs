@@ -1,0 +1,461 @@
+use blueprint_sdk as sdk;
+use color_eyre::Result;
+use hyperlane_validator_blueprint_lib as blueprint;
+use sdk::Job;
+use sdk::alloy::primitives::Address;
+use sdk::alloy::primitives::Bytes;
+use sdk::alloy::primitives::U256;
+use sdk::alloy::signers::local::PrivateKeySigner;
+use sdk::alloy::sol;
+use sdk::tangle::layers::TangleLayer;
+use sdk::tangle::serde::to_field;
+use sdk::testing::utils::setup_log;
+use sdk::testing::utils::tangle::harness::SetupServicesOpts;
+use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
+use std::str::FromStr;
+use std::time::Duration;
+
+mod utils;
+use crate::utils::DESTINATION_DOMAIN;
+use crate::utils::blockchain::WalletProvider;
+use utils::blockchain::{increase_time, mine_block, provider, wallet_for_key};
+use utils::challenger::{
+    create_fraudulent_checkpoint_proof, create_simple_challenge_proof, verify_operator_enrollment,
+};
+use utils::network::{
+    TESTNET1_STATE_PATH, TESTNET2_STATE_PATH, cleanup_networks, setup_temp_dir,
+    spinup_anvil_testnets, spinup_relayer,
+};
+use utils::{ORIGIN_DOMAIN, SLASH_PERCENTAGE, TESTNET1_MAILBOX, TESTNET2_MAILBOX};
+
+sol!(
+    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[sol(rpc)]
+    #[derive(Debug)]
+    Mailbox,
+    "contracts/out/Mailbox.sol/Mailbox.json"
+);
+
+sol!(
+    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[sol(rpc)]
+    #[derive(Debug)]
+    TestRecipient,
+    "contracts/out/TestRecipient.sol/TestRecipient.json"
+);
+
+sol!(
+    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[sol(rpc)]
+    #[derive(Debug)]
+    SimpleChallenger,
+    "contracts/out/SimpleChallenger.sol/SimpleChallenger.json"
+);
+
+sol!(
+    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[sol(rpc)]
+    #[derive(Debug)]
+    EquivocationChallenger,
+    "contracts/out/EquivocationChallenger.sol/EquivocationChallenger.json"
+);
+
+sol!(
+    #[allow(missing_docs, clippy::too_many_arguments)]
+    #[sol(rpc)]
+    #[derive(Debug)]
+    HyperlaneValidatorBlueprint,
+    "contracts/out/HyperlaneValidatorBlueprint.sol/HyperlaneValidatorBlueprint.json"
+);
+
+#[tokio::test]
+#[serial_test::serial]
+async fn challenger_test() -> Result<()> {
+    setup_log();
+
+    match challenger_test_inner().await {
+        Ok(_) => Ok(()),
+        Err(err) => {
+            eprintln!("Error: {err:?}");
+            let _ = cleanup_networks().await;
+            Err(err)
+        }
+    }
+}
+
+// #[tokio::test]
+// #[serial_test::serial]
+// async fn validator_challenger_test() -> Result<()> {
+//     setup_log();
+//
+//     match validator_challenger_test_inner().await {
+//         Ok(_) => Ok(()),
+//         Err(err) => {
+//             eprintln!("Error: {err:?}");
+//             let _ = cleanup_networks().await;
+//             Err(err)
+//         }
+//     }
+// }
+
+async fn challenger_test_inner() -> Result<()> {
+    // Spin up the testnets
+    let (origin_testnet, dest_testnet) =
+        spinup_anvil_testnets(TESTNET1_STATE_PATH, TESTNET2_STATE_PATH).await?;
+
+    let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
+    let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
+
+    let origin_ports = origin_testnet.inner.container.ports().await?;
+    let dest_ports = dest_testnet.inner.container.ports().await?;
+
+    let testnet1_host_rpc_url = format!(
+        "http://127.0.0.1:{}",
+        origin_ports.map_to_host_port_ipv4(8545).unwrap()
+    );
+    let testnet2_host_rpc_url = format!(
+        "http://127.0.0.1:{}",
+        dest_ports.map_to_host_port_ipv4(8545).unwrap()
+    );
+
+    // Setup temporary directory
+    let tempdir = setup_temp_dir(
+        (testnet1_docker_rpc_url, testnet1_host_rpc_url.clone()),
+        (testnet2_docker_rpc_url, testnet2_host_rpc_url.clone()),
+    )?;
+    let temp_dir_path = tempdir.path().to_path_buf();
+
+    sdk::info!("Setting up challenger...");
+
+    // Get the provider for interacting with the blockchain
+    let provider = provider(&testnet1_host_rpc_url);
+
+    // Get a wallet for creating transactions
+    let deployer_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+    let (deployer_signer, provider_with_wallet) =
+        wallet_for_key(deployer_key, &testnet1_host_rpc_url);
+
+    let (simple_challenger, equivocation_challenger) =
+        deploy_challengers(provider_with_wallet).await?;
+
+    // Initialize test harness
+    let harness = TangleTestHarness::setup(tempdir).await?;
+
+    // Create a test environment and let tangle initialize it
+    let (mut test_env, service_id, _) = harness
+        .setup_services_with_options::<1>(SetupServicesOpts {
+            exit_after_registration: false,
+            registration_args: Default::default(),
+            request_args: vec![to_field(blueprint::HyperlaneRequestInputs {
+                origin_domain: ORIGIN_DOMAIN,
+                destination_domain: DESTINATION_DOMAIN,
+                origin_mailbox_address: TESTNET1_MAILBOX,
+                destination_mailbox_address: TESTNET2_MAILBOX,
+                challengers: vec![
+                    *simple_challenger.address(),
+                    *equivocation_challenger.address(),
+                ]
+                .into(),
+            })?],
+        })
+        .await?;
+
+    // Initialize the test environment (load the contracts)
+    test_env.initialize().await?;
+
+    // Add a job to set the config with challenger capability
+    test_env
+        .add_job(blueprint::set_config.layer(TangleLayer))
+        .await;
+
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+
+    // Start the test environment (this will start the config job)
+    test_env.start(ctx).await?;
+
+    // Pass the arguments
+    let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
+    let config_urls = to_field(Some(vec![format!(
+        "file://{}",
+        agent_config_path.display()
+    )]))?;
+    let origin_chain_name = to_field(String::from("testnet1"))?;
+
+    // Execute job and verify result
+    let call = harness
+        .submit_job(service_id, 0, vec![config_urls, origin_chain_name])
+        .await?;
+
+    let results = harness.wait_for_job_execution(0, call).await?;
+
+    harness.verify_job(&results, vec![OutputValue::Uint64(0)]);
+    assert_eq!(results.service_id, service_id);
+
+    // Now we'll test creating a challenger by setting up a transaction that creates
+    // a fraudulent checkpoint that can be challenged
+
+    let operator_address = harness.ecdsa_signer.alloy_address()?;
+
+    // Create a fraudulent checkpoint that will be used to challenge the validator
+    sdk::info!("Creating fraudulent checkpoint proof for testing...");
+    // Convert the key to a PrivateKeySigner for the create_fraudulent_checkpoint_proof function
+    let checkpoint_proof = create_fraudulent_checkpoint_proof(
+        &harness.alloy_key,
+        operator_address,
+        service_id as u32,
+        1,
+        TESTNET1_MAILBOX,
+        TESTNET2_MAILBOX,
+    )
+    .await?;
+
+    // Submit challenge to the EquivocationChallenger
+    sdk::info!("Submitting equivocation challenge...");
+    let tx = equivocation_challenger
+        .handleChallenge(
+            U256::from(service_id),
+            operator_address,
+            checkpoint_proof.clone(),
+        )
+        .send()
+        .await?;
+    tx.get_receipt().await?;
+
+    // Verify that the challenge was submitted successfully
+    let is_challenged = equivocation_challenger
+        .isOperatorEnrolled(U256::from(service_id), operator_address)
+        .call()
+        .await?
+        ._0;
+    assert!(
+        !is_challenged,
+        "Operator should not be enrolled after challenge by EquivocationChallenger"
+    );
+
+    // Also create and submit a simple challenge
+    sdk::info!("Creating and submitting simple challenge...");
+    let simple_proof = create_simple_challenge_proof(
+        operator_address,
+        service_id as u32,
+        Some("Test challenge - failed to perform validation duties"),
+        TESTNET1_MAILBOX,
+        TESTNET2_MAILBOX,
+    );
+
+    let tx = simple_challenger
+        .handleChallenge(
+            U256::from(service_id),
+            operator_address,
+            simple_proof.clone(),
+        )
+        .send()
+        .await?;
+    tx.get_receipt().await?;
+
+    // Verify the simple challenge
+    let is_challenged = simple_challenger
+        .isOperatorEnrolled(U256::from(service_id), operator_address)
+        .call()
+        .await?
+        ._0;
+    assert!(
+        !is_challenged,
+        "Operator should not be enrolled after challenge by SimpleChallenger"
+    );
+
+    // Advance time to allow the challenge to finalize
+    sdk::info!("Advancing time to finalize challenges...");
+    increase_time(&testnet1_host_rpc_url, 86400).await?;
+
+    // No need to submit challenges again as they are already finalized
+
+    // Verify the operator has been slashed (no longer enrolled)
+    let is_enrolled = verify_operator_enrollment(
+        &provider,
+        *equivocation_challenger.address(),
+        operator_address,
+        service_id as u32,
+    )
+    .await?;
+
+    assert!(
+        !is_enrolled,
+        "Operator should be unenrolled after challenge is processed"
+    );
+
+    sdk::info!("Challenger test completed successfully");
+
+    // Clean up resources
+    cleanup_networks().await?;
+
+    Ok(())
+}
+
+// async fn validator_challenger_test_inner() -> Result<()> {
+//     // Clean up any existing networks before starting
+//     let _ = cleanup_networks().await;
+//
+//     // Spin up the testnets
+//     let (origin_testnet, dest_testnet) =
+//         spinup_anvil_testnets(TESTNET1_STATE_PATH, TESTNET2_STATE_PATH).await?;
+//
+//     // The validator itself uses the IPs internal to the Docker network.
+//     // When it comes time to relay the message, the command is run outside the Docker network,
+//     // so we need to get both addresses.
+//     let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
+//     let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
+//
+//     let origin_ports = origin_testnet.inner.container.ports().await?;
+//     let dest_ports = dest_testnet.inner.container.ports().await?;
+//
+//     let testnet1_host_rpc_url = format!(
+//         "http://127.0.0.1:{}",
+//         origin_ports.map_to_host_port_ipv4(8545).unwrap()
+//     );
+//     let testnet2_host_rpc_url = format!(
+//         "http://127.0.0.1:{}",
+//         dest_ports.map_to_host_port_ipv4(8545).unwrap()
+//     );
+//
+//     // Setup temporary directory
+//     let tempdir = setup_temp_dir(
+//         (testnet1_docker_rpc_url, testnet1_host_rpc_url.clone()),
+//         (testnet2_docker_rpc_url, testnet2_host_rpc_url.clone()),
+//     )?;
+//     let temp_dir_path = tempdir.path().to_path_buf();
+//
+//     // Initialize test harness
+//     let harness = TangleTestHarness::setup(tempdir).await?;
+//
+//     // Create hyperlane context
+//
+//     // Setup services
+//     let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
+//     test_env.initialize().await?;
+//     test_env
+//         .add_job(blueprint::set_config.layer(TangleLayer))
+//         .await;
+//
+//     let ctx =
+//         blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+//
+//     test_env.start(ctx).await?;
+//
+//     // Configure the validator with challenger
+//     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;
+//     let config_urls = to_field(Some(vec![format!(
+//         "file://{}",
+//         agent_config_path.display()
+//     )]))?;
+//     let origin_chain_name = to_field(String::from("testnet1"))?;
+//
+//     // Submit the job
+//     let call = harness
+//         .submit_job(service_id, 0, vec![config_urls, origin_chain_name])
+//         .await?;
+//
+//     let results = harness.wait_for_job_execution(0, call).await?;
+//     harness.verify_job(&results, vec![OutputValue::Uint64(0)]);
+//
+//     sdk::info!("Validator running, starting relayer...");
+//     spinup_relayer(
+//         &origin_testnet,
+//         &dest_testnet,
+//         harness.env().clone(),
+//         &temp_dir_path,
+//     )
+//     .await?;
+//
+//     sdk::info!("Setting up validator challenger environment");
+//
+//     // Create a deployer wallet for contract interactions
+//     let deployer_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+//     let (deployer_signer, deployer_provider) = wallet_for_key(deployer_key, &testnet1_host_rpc_url);
+//
+//     // Deploy the test contracts for challenger testing
+//     sdk::info!("Deploying challenger contracts for testing");
+//     let simple_challenger =
+//         SimpleChallenger::deploy(deployer_provider.clone(), SLASH_PERCENTAGE).await?;
+//
+//     // No initialization needed for SimpleChallenger since it's done in the constructor
+//     sdk::info!("SimpleChallenger deployed successfully");
+//
+//     // Wait for validator to settle
+//     tokio::time::sleep(Duration::from_secs(2)).await;
+//
+//     // Mine a block to trigger validator activities
+//     mine_block(&origin_testnet.inner.http_endpoint, Some(1)).await?;
+//
+//     // Test enrolling an operator in the challenger
+//     let service_id = 1u64;
+//     let operator_address = deployer_signer.address();
+//
+//     let tx = simple_challenger
+//         .enrollOperator(U256::from(service_id), operator_address, Bytes::default())
+//         .send()
+//         .await?;
+//     tx.get_receipt().await?;
+//
+//     sdk::info!("Enrolled test operator in the challenger contract");
+//
+//     // Create a simple challenge proof and submit it
+//     let simple_proof = create_simple_challenge_proof(
+//         operator_address,
+//         service_id as u32,
+//         Some("Testing validator challenger system"),
+//         TESTNET1_MAILBOX,
+//         TESTNET2_MAILBOX,
+//     );
+//
+//     let tx = simple_challenger
+//         .handleChallenge(U256::from(service_id), operator_address, simple_proof)
+//         .send()
+//         .await?;
+//     tx.get_receipt().await?;
+//
+//     // Verify the challenge was submitted successfully
+//     let is_enrolled = simple_challenger
+//         .isOperatorEnrolled(U256::from(service_id), operator_address)
+//         .call()
+//         .await?
+//         ._0;
+//     assert!(
+//         !is_enrolled,
+//         "Operator should not be enrolled after challenge"
+//     );
+//
+//     sdk::info!("Successfully challenged operator in validator system");
+//
+//     // Give validator time to react to the new block
+//     tokio::time::sleep(Duration::from_secs(5)).await;
+//
+//     sdk::info!("Validator challenger test completed successfully");
+//
+//     // Clean up
+//     cleanup_networks().await?;
+//
+//     Ok(())
+// }
+
+async fn deploy_challengers(
+    provider: WalletProvider,
+) -> Result<(
+    SimpleChallenger::SimpleChallengerInstance<(), WalletProvider>,
+    EquivocationChallenger::EquivocationChallengerInstance<(), WalletProvider>,
+)> {
+    // Deploy contracts needed for testing
+    sdk::info!("Deploying SimpleChallenger");
+    let simple_challenger = SimpleChallenger::deploy(provider.clone(), SLASH_PERCENTAGE).await?;
+
+    sdk::info!("SimpleChallenger deployed successfully");
+
+    sdk::info!("Deploying EquivocationChallenger");
+    let equivocation_challenger =
+        EquivocationChallenger::deploy(provider, SLASH_PERCENTAGE, ORIGIN_DOMAIN, TESTNET1_MAILBOX)
+            .await?;
+
+    sdk::info!("EquivocationChallenger deployed successfully");
+
+    Ok((simple_challenger, equivocation_challenger))
+}

@@ -19,10 +19,11 @@ hex.workspace = true
 reqwest.workspace = true
 dockworker = { workspace = true, features = ["docker"] }
 bollard.workspace = true
+serial_test = "3.2.0"
 
 [dev-dependencies]
 blueprint-sdk = { workspace = true, features = ["testing", "evm"] }
-hyperlane-relayer-blueprint-lib = { git = "https://github.com/tangle-network/hyperlane-relayer-blueprint.git" }
+hyperlane-relayer-blueprint-lib.workspace = true
 testcontainers = "0.23.1"
 futures = "0.3.31"
 
@@ -45,12 +46,17 @@ keywords = ["tangle", "blueprint", "avs"]
 # Our blueprint
 hyperlane-validator-blueprint-lib = { path = "." }
 
+# External blueprint
+#hyperlane-relayer-blueprint-lib = { git = "https://github.com/tangle-network/hyperlane-relayer-blueprint.git" }
+hyperlane-relayer-blueprint-lib = { path = "../hyperlane-blueprint-template" }
+
 tracing = "0.1"
 tracing-subscriber = "0.3.19"
 color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.44.0"
 reqwest = "0.12.15"
-blueprint-sdk = { git = "https://github.com/tangle-network/blueprint.git" }
+#blueprint-sdk = { git = "https://github.com/tangle-network/blueprint.git" }
+blueprint-sdk = { path = "../gadget/crates/sdk" }
 dockworker = { git = "https://github.com/tangle-network/dockworker" }
 bollard = "0.17"
