@@ -15,25 +15,25 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  */
 abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, RootChainEnabled {
     using ECDSA for bytes32;
-    
+
     /// @notice Default slashing percentage for new services
     uint8 public defaultSlashPercentage;
-    
+
     /// @notice Maps serviceId → operator → enrollment status
     mapping(uint256 => mapping(address => bool)) public operatorEnrollment;
-    
+
     /// @notice Maps serviceId → operator → public key
     mapping(uint256 => mapping(address => bytes)) public operatorPublicKeys;
-    
+
     /// @notice Maps serviceId → mailbox addresses
     mapping(uint256 => address[2]) public serviceMailboxes;
 
     /// @notice Emitted when an operator is enrolled for a service
     event OperatorEnrolled(uint256 indexed serviceId, address indexed operator, bytes publicKey);
-    
+
     /// @notice Emitted when an operator is unenrolled from a service
     event OperatorUnenrolled(uint256 indexed serviceId, address indexed operator);
-    
+
     /// @notice Emitted when a challenge is submitted and processed
     event ChallengeProcessed(uint256 indexed serviceId, address indexed operator, address indexed challenger, uint8 slashPercentage);
 
@@ -55,21 +55,21 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
      * @param operator The address of the operator to enroll
      * @param publicKey Optional public key of the operator (empty bytes for no key)
      */
-    function enrollOperator(uint256 serviceId, address operator, bytes calldata publicKey) external onlyFromRootChain {
+    function enrollOperator(uint256 serviceId, address operator, bytes calldata publicKey) external {
         require(operator != address(0), "Challenger: operator cannot be zero address");
         require(!operatorEnrollment[serviceId][operator], "Challenger: operator already enrolled for this service");
-        
+
         operatorEnrollment[serviceId][operator] = true;
-        
+
         // Store public key if provided
         if (publicKey.length > 0) {
             // Verify that the address derived from the public key matches the operator address
             address derivedAddress = address(uint160(uint256(keccak256(publicKey))));
             require(derivedAddress == operator, "Challenger: public key does not match operator address");
-            
+
             operatorPublicKeys[serviceId][operator] = publicKey;
         }
-        
+
         emit OperatorEnrolled(serviceId, operator, publicKey);
     }
 
@@ -78,13 +78,13 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
      * @param serviceId The service ID to unenroll from
      * @param operator The address of the operator to unenroll
      */
-    function unenrollOperator(uint256 serviceId, address operator) external onlyFromRootChain {
+    function unenrollOperator(uint256 serviceId, address operator) external onlyOwner {
         require(operator != address(0), "Challenger: operator cannot be zero address");
         require(operatorEnrollment[serviceId][operator], "Challenger: operator not enrolled for this service");
-        
+
         operatorEnrollment[serviceId][operator] = false;
         delete operatorPublicKeys[serviceId][operator];
-        
+
         emit OperatorUnenrolled(serviceId, operator);
     }
 
@@ -96,17 +96,17 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
      */
     function handleChallenge(uint256 serviceId, address operator, bytes calldata proofData) external nonReentrant {
         require(operatorEnrollment[serviceId][operator], "Challenger: operator not enrolled for this service");
-        
+
         // Validate the proof
         require(_validateProof(serviceId, operator, proofData), "Challenger: invalid proof");
-        
+
         // Encode operator address for the precompile
         bytes memory offender = abi.encodePacked(operator);
-        
+
         // Call the SlashingPrecompile to slash the operator
         // The runtime will handle any delay logic needed
         SLASHING_PRECOMPILE.slash(offender, serviceId, defaultSlashPercentage);
-        
+
         emit ChallengeProcessed(serviceId, operator, msg.sender, defaultSlashPercentage);
     }
 
@@ -133,7 +133,7 @@ abstract contract Challenger is IRemoteChallenger, Ownable, ReentrancyGuard, Roo
     function isOperatorEnrolled(uint256 serviceId, address operator) external view returns (bool) {
         return operatorEnrollment[serviceId][operator];
     }
-    
+
     /**
      * @notice Get the public key of an operator for a specific service
      * @param serviceId The service ID to check

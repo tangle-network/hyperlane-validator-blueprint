@@ -25,6 +25,7 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address owner;
         uint64 ttl;
         address[] permittedCallers;
+        address[] challengers;
     }
 
     // Structure to store approved operator information
@@ -39,11 +40,11 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
     // Mapping of requestId to request inputs
     mapping(uint64 => HyperlaneRequestInputs) private _pendingRequests;
 
-    // Mapping of requestId to approved operators
-    mapping(uint64 => OperatorApproval[]) private _approvedOperators;
+    // Mapping of serviceId to operators
+    mapping(uint256 => ServiceOperators.OperatorPreferences[]) private _pendingOperators;
 
     // Mapping of serviceId to operators
-    mapping(uint256 => OperatorApproval[]) private _operators;
+    mapping(uint256 => ServiceOperators.OperatorPreferences[]) private _operators;
 
     // Event emitted when a service instance is created
     event ServiceInstanceCreated(
@@ -53,13 +54,6 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         address owner,
         address[] permittedCallers,
         uint64 ttl
-    );
-
-    // Event emitted when an operator approves a service request
-    event OperatorApproved(
-        uint64 indexed requestId,
-        address indexed operator,
-        bytes publicKey
     );
 
     // Event emitted when an operator rejects a service request
@@ -104,14 +98,7 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         uint64 requestId,
         uint8 restakingPercent
     ) external payable override onlyFromMaster {
-        // Store the approval
-        address operatorAddress = _operatorAddressFromPublicKey(operator.ecdsaPublicKey);
-        _approvedOperators[requestId].push(OperatorApproval({
-            operator: operatorAddress,
-            publicKey: operator.ecdsaPublicKey
-        }));
-
-        emit OperatorApproved(requestId, operatorAddress, operator.ecdsaPublicKey);
+        _pendingOperators[requestId].push(operator);
     }
 
     /**
@@ -138,18 +125,15 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
         for (uint256 i = 0; i < inputs.challengers.length; i++) {
             address challenger = inputs.challengers[i];
 
-            // Validate the challenger is registered
-            require(isRegisteredChallenger(challenger), "HVB: invalid challenger");
-
             // Register the challenger for this service instance
             _registerChallengerForService(serviceId, challenger);
         }
 
         // Enroll all approved operators in all challengers for this service
-        OperatorApproval[] memory approvals = _approvedOperators[requestId];
+        ServiceOperators.OperatorPreferences[] memory approvals = _pendingOperators[requestId];
         for (uint256 i = 0; i < approvals.length; i++) {
-            address operator = approvals[i].operator;
-            bytes memory publicKey = approvals[i].publicKey;
+            bytes memory publicKey = approvals[i].ecdsaPublicKey;
+            address operator = _operatorAddressFromPublicKey(publicKey);
 
             // Add the operator to the service
             _operators[serviceId].push(approvals[i]);
@@ -171,12 +155,13 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             destinationDomain: inputs.destinationDomain,
             owner: owner,
             permittedCallers: permittedCallers,
-            ttl: ttl
+            ttl: ttl,
+            challengers: inputs.challengers
         });
 
         // Clean up the pending request and approvals
         delete _pendingRequests[requestId];
-        delete _approvedOperators[requestId];
+        delete _pendingOperators[requestId];
 
         // Emit event for service instance creation
         emit ServiceInstanceCreated(
@@ -187,13 +172,6 @@ contract HyperlaneValidatorBlueprint is ChallengerEnrollment {
             permittedCallers,
             ttl
         );
-    }
-
-    function addChallenger(uint256 serviceId, address challenger) external onlyPermittedCaller(serviceId) {
-        _registerChallengerForService(serviceId, challenger);
-        for (uint256 i = 0; i < _operators[serviceId].length; i++) {
-            IRemoteChallenger(challenger).enrollOperator(serviceId, _operators[serviceId][i].operator, _operators[serviceId][i].publicKey);
-        }
     }
 
     /**

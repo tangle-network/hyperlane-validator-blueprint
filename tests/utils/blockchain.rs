@@ -4,9 +4,12 @@ use blueprint_sdk::alloy::network::NetworkWallet;
 use blueprint_sdk::alloy::primitives::Address;
 use blueprint_sdk::alloy::primitives::B256;
 use blueprint_sdk::alloy::primitives::U256;
-use blueprint_sdk::alloy::providers::Provider;
 use blueprint_sdk::alloy::providers::ProviderBuilder;
 use blueprint_sdk::alloy::providers::RootProvider;
+use blueprint_sdk::alloy::providers::fillers::{
+    BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller,
+};
+use blueprint_sdk::alloy::providers::{Identity, Provider};
 use blueprint_sdk::alloy::rpc::types::TransactionRequest;
 use blueprint_sdk::alloy::signers::local::MnemonicBuilder;
 use blueprint_sdk::alloy::signers::local::PrivateKeySigner;
@@ -45,15 +48,31 @@ pub fn wallet_for(idx: WalletIndex) -> PrivateKeySigner {
         .unwrap()
 }
 
+pub type WalletProvider = FillProvider<
+    JoinFill<
+        JoinFill<
+            Identity,
+            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
+        >,
+        WalletFiller<EthereumWallet>,
+    >,
+    RootProvider,
+>;
+
 /// Get a wallet and provider for a private key and RPC URL
 ///
 /// # Parameters
 /// * `key` - The private key to use (hex string)
 /// * `rpc` - The RPC URL to connect to
-pub fn wallet_for_key(key: &str, rpc: &str) -> (PrivateKeySigner, RootProvider) {
+pub fn wallet_for_key(key: &str, rpc: &str) -> (PrivateKeySigner, WalletProvider) {
     let signer = PrivateKeySigner::from_str(key).unwrap();
     let wallet = EthereumWallet::new(signer.clone());
-    (signer, get_wallet_provider_http(rpc, wallet.clone()))
+    (
+        signer,
+        ProviderBuilder::new()
+            .wallet(wallet)
+            .on_http(rpc.parse().unwrap()),
+    )
 }
 
 /// Gets a provider for the specified RPC URL

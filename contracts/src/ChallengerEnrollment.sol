@@ -11,18 +11,15 @@ import "./challengers/IRemoteChallenger.sol";
  * This contract provides mechanisms for registering challengers and tracking service-specific challengers.
  */
 abstract contract ChallengerEnrollment is BlueprintServiceManagerBase, Ownable {
-    /// @notice Maps challenger address to whether it's registered
-    mapping(address => bool) public registeredChallengers;
-    
     /// @notice Maps service ID to array of challenger addresses
     mapping(uint256 => address[]) private _serviceChallengers;
-    
+
     /// @notice Emitted when a new challenger is registered
     event ChallengerRegistered(address indexed challenger);
-    
+
     /// @notice Emitted when a challenger is unregistered
     event ChallengerUnregistered(address indexed challenger);
-    
+
     /// @notice Emitted when a challenger is registered for a service
     event ChallengerRegisteredForService(uint256 indexed serviceId, address indexed challenger);
 
@@ -32,28 +29,17 @@ abstract contract ChallengerEnrollment is BlueprintServiceManagerBase, Ownable {
      * @param challenger The challenger address.
      */
     function _registerChallengerForService(uint256 serviceId, address challenger) internal {
-        require(registeredChallengers[challenger], "CE: challenger not registered");
-        
         // Check if already registered (prevent duplicates)
         address[] storage challengers = _serviceChallengers[serviceId];
         for (uint256 i = 0; i < challengers.length; i++) {
             if (challengers[i] == challenger) return;
         }
-        
+
         // Add to the service challengers
         _serviceChallengers[serviceId].push(challenger);
         emit ChallengerRegisteredForService(serviceId, challenger);
     }
 
-    /**
-     * @notice Checks if a challenger is registered.
-     * @param challenger The challenger address to check.
-     * @return Whether the challenger is registered.
-     */
-    function isRegisteredChallenger(address challenger) public view returns (bool) {
-        return registeredChallengers[challenger];
-    }
-    
     /**
      * @notice Helper function to convert a public key to an operator address.
      * @param publicKey The public key to convert.
