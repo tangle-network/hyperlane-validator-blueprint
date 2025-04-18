@@ -4,7 +4,7 @@ use bollard::models::EndpointSettings;
 use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
 use color_eyre::Report;
 use color_eyre::Result;
-use dockworker::DockerBuilder;
+use docktopus::DockerBuilder;
 use futures::StreamExt;
 use hyperlane_validator_blueprint_lib as blueprint;
 use sdk::Job;
@@ -20,11 +20,12 @@ use sdk::evm::util::get_wallet_provider_http;
 use sdk::extract::Context;
 use sdk::keystore::backends::Backend;
 use sdk::runner::config::BlueprintEnvironment;
-use sdk::serde::to_field;
 use sdk::tangle::extract::TangleArgs2;
 use sdk::tangle::layers::TangleLayer;
+use sdk::tangle::serde::to_field;
+use sdk::testing::chain_setup::anvil::AnvilTestnet;
+use sdk::testing::chain_setup::anvil::start_anvil_container;
 use sdk::testing::tempfile::{self, TempDir};
-use sdk::testing::utils::anvil::start_anvil_container;
 use sdk::testing::utils::setup_log;
 use sdk::testing::utils::tangle::{OutputValue, TangleTestHarness};
 use std::fs;
@@ -111,12 +112,9 @@ const RELAYER_NETWORK_NAME: &str = "hyperlane_relayer_test_net";
 
 #[allow(dead_code)]
 struct Testnet {
-    container: ContainerAsync<GenericImage>,
+    inner: AnvilTestnet,
     validator_network_ip: String,
     relayer_network_ip: String,
-    http: String,
-    ws: String,
-    tmp_dir: TempDir,
 }
 
 async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
@@ -127,7 +125,7 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
         dest: &ContainerAsync<GenericImage>,
     ) -> Result<(EndpointSettings, EndpointSettings)> {
         if let Err(e) = connection
-            .get_client()
+            .client()
             .create_network(CreateNetworkOptions {
                 name: network,
                 ..Default::default()
@@ -143,7 +141,7 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
         }
 
         connection
-            .get_client()
+            .client()
             .connect_network(network, ConnectNetworkOptions {
                 container: origin.id(),
                 ..Default::default()
@@ -151,7 +149,7 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
             .await?;
 
         connection
-            .get_client()
+            .client()
             .connect_network(network, ConnectNetworkOptions {
                 container: dest.id(),
                 ..Default::default()
@@ -159,7 +157,7 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
             .await?;
 
         let origin_container_inspect = connection
-            .get_client()
+            .client()
             .inspect_container(origin.id(), None)
             .await?;
         let origin_network_settings = origin_container_inspect
@@ -170,7 +168,7 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
             .clone();
 
         let dest_container_inspect = connection
-            .get_client()
+            .client()
             .inspect_container(dest.id(), None)
             .await?;
         let dest_network_settings = dest_container_inspect
@@ -184,46 +182,38 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
     }
 
     let origin_state = fs::read_to_string(TESTNET1_STATE_PATH)?;
-    let (origin_container, origin_http, origin_ws, origin_tmp_dir) =
-        start_anvil_container(&origin_state, false).await;
+    let origin_testnet = start_anvil_container(Some(&origin_state), false).await;
 
     let dest_state = fs::read_to_string(TESTNET2_STATE_PATH)?;
-    let (dest_container, dest_http, dest_ws, dest_tmp_dir) =
-        start_anvil_container(&dest_state, false).await;
+    let dest_testnet = start_anvil_container(Some(&dest_state), false).await;
 
     let connection = DockerBuilder::new().await?;
     let validator_network_config = setup_network(
         &connection,
         VALIDATOR_NETWORK_NAME,
-        &origin_container,
-        &dest_container,
+        &origin_testnet.container,
+        &dest_testnet.container,
     )
     .await?;
 
     let relayer_network_config = setup_network(
         &connection,
         RELAYER_NETWORK_NAME,
-        &origin_container,
-        &dest_container,
+        &origin_testnet.container,
+        &dest_testnet.container,
     )
     .await?;
 
     Ok((
         Testnet {
-            container: origin_container,
+            inner: origin_testnet,
             validator_network_ip: validator_network_config.0.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.0.ip_address.unwrap(),
-            http: origin_http,
-            ws: origin_ws,
-            tmp_dir: origin_tmp_dir,
         },
         Testnet {
-            container: dest_container,
+            inner: dest_testnet,
             validator_network_ip: validator_network_config.1.ip_address.unwrap(),
             relayer_network_ip: relayer_network_config.1.ip_address.unwrap(),
-            http: dest_http,
-            ws: dest_ws,
-            tmp_dir: dest_tmp_dir,
         },
     ))
 }
@@ -281,12 +271,12 @@ async fn validator() -> Result<()> {
     let connection = DockerBuilder::new().await?;
     for network_name in [VALIDATOR_NETWORK_NAME, RELAYER_NETWORK_NAME] {
         let network = connection
-            .get_client()
+            .client()
             .inspect_network(network_name, None::<InspectNetworkOptions<String>>)
             .await?;
         for container in network.containers.unwrap().keys() {
             connection
-                .get_client()
+                .client()
                 .remove_container(
                     container,
                     Some(RemoveContainerOptions {
@@ -353,8 +343,8 @@ async fn validator_test_inner() -> Result<()> {
     let testnet1_docker_rpc_url = format!("http://{}:8545", origin_testnet.validator_network_ip);
     let testnet2_docker_rpc_url = format!("http://{}:8545", dest_testnet.validator_network_ip);
 
-    let origin_ports = origin_testnet.container.ports().await?;
-    let dest_ports = dest_testnet.container.ports().await?;
+    let origin_ports = origin_testnet.inner.container.ports().await?;
+    let dest_ports = dest_testnet.inner.container.ports().await?;
 
     let testnet1_host_rpc_url = format!(
         "http://127.0.0.1:{}",
@@ -373,10 +363,6 @@ async fn validator_test_inner() -> Result<()> {
 
     let harness = TangleTestHarness::setup(tempdir).await?;
 
-    let ctx =
-        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
-    let harness = harness.set_context(ctx);
-
     // Setup service
     let (mut test_env, service_id, _) = harness.setup_services::<1>(false).await?;
     test_env.initialize().await?;
@@ -384,7 +370,10 @@ async fn validator_test_inner() -> Result<()> {
         .add_job(blueprint::set_config.layer(TangleLayer))
         .await;
 
-    test_env.start().await?;
+    let ctx =
+        blueprint::HyperlaneContext::new(harness.env().clone(), temp_dir_path.clone()).await?;
+
+    test_env.start(ctx).await?;
 
     // Pass the arguments
     let agent_config_path = std::path::absolute(temp_dir_path.join("agent-config.json"))?;

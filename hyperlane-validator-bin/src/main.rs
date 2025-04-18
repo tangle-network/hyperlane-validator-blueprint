@@ -19,12 +19,12 @@ async fn main() -> color_eyre::Result<()> {
     let env = BlueprintEnvironment::load()?;
 
     let data_dir = env.data_dir.clone().unwrap_or_else(|| {
-        tracing::warn!("Data dir not specified, using default");
+        sdk::warn!("Data dir not specified, using default");
         blueprint::default_data_dir()
     });
 
     if !data_dir.exists() {
-        tracing::warn!("Data dir does not exist, creating");
+        sdk::warn!("Data dir does not exist, creating");
         std::fs::create_dir_all(&data_dir)?;
     }
 
