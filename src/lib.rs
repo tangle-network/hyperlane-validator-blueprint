@@ -2,8 +2,8 @@ use blueprint_sdk as sdk;
 use bollard::network::ConnectNetworkOptions;
 use color_eyre::Result;
 use color_eyre::eyre::eyre;
-use dockworker::DockerBuilder;
-use dockworker::container::Container;
+use docktopus::DockerBuilder;
+use docktopus::container::Container;
 use sdk::crypto::sp_core::SpEcdsa;
 use sdk::crypto::tangle_pair_signer::TanglePairSigner;
 use sdk::extract::Context;
@@ -57,7 +57,7 @@ impl HyperlaneContext {
             return Err(eyre!("Docker pull failed"));
         }
 
-        let mut container = Container::new(self.connection.get_client(), IMAGE);
+        let mut container = Container::new(self.connection.client(), IMAGE);
 
         let keystore = self.env.keystore();
         let ecdsa_pub = keystore.first_local::<SpEcdsa>()?;
@@ -125,7 +125,7 @@ impl HyperlaneContext {
         if self.env.test_mode {
             let id = container.id().unwrap();
             self.connection
-                .get_client()
+                .client()
                 .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
                     container: id,
                     ..Default::default()
@@ -189,7 +189,7 @@ impl HyperlaneContext {
         let mut container_id = self.container.lock().await;
         if let Some(container_id) = container_id.take() {
             blueprint_sdk::warn!("Removing existing container...");
-            let mut c = Container::from_id(self.connection.get_client(), container_id).await?;
+            let mut c = Container::from_id(self.connection.client(), container_id).await?;
             c.stop().await?;
             c.remove(None).await?;
         }
