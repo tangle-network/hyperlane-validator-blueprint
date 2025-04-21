@@ -19,9 +19,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly-2024-10-13
           components: rustfmt
 
       - name: Check Formatting
