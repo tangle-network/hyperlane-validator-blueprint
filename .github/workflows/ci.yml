@@ -55,9 +55,8 @@ jobs:
       - name: Install Solidity Dependencies
         run: forge soldeer update -d
 
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly-2024-10-13
           components: clippy
 
       - uses: swatinem/rust-cache@v2
@@ -102,9 +101,7 @@ jobs:
       - name: Install Solidity Dependencies
         run: forge soldeer update -d
 
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          toolchain: nightly-2024-10-13
+      - uses: dtolnay/rust-toolchain@stable
 
       - uses: swatinem/rust-cache@v2
         with:
