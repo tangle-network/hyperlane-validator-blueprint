@@ -1,6 +1,8 @@
 FROM lukemathwalker/cargo-chef:latest-rust-bookworm AS chef
 WORKDIR /app
 
+COPY Cargo.toml Cargo.lock ./
+
 FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
@@ -34,7 +36,7 @@ LABEL org.opencontainers.image.description="A Tangle Blueprint (AVS) for deployi
 LABEL org.opencontainers.image.source="https://github.com/tangle-network/hyperlane-validator-blueprint"
 LABEL org.opencontainers.image.licenses="MIT OR Apache-2.0"
 
-ENV RUST_LOG="gadget=info"
+ENV RUST_LOG="info"
 ENV BIND_ADDR="0.0.0.0"
 ENV BIND_PORT=9632
 ENV BLUEPRINT_ID=0

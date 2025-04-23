@@ -110,26 +110,26 @@ impl HyperlaneContext {
             env.push(format!("HYP_ORIGINCHAINNAME={origin_chain_name}"));
         }
 
-        container
-            .env(env)
-            .binds(binds)
-            .cmd([
-                "./validator",
-                "--db /hyperlane_db",
-                "--validator.key",
-                &format!("0x{secret}"),
-            ])
-            .create()
-            .await?;
+        container = container.env(env).binds(binds).cmd([
+            "./validator",
+            "--db /hyperlane_db",
+            "--validator.key",
+            &format!("0x{secret}"),
+        ]);
+
+        container.create().await?;
 
         if self.env.test_mode {
             let id = container.id().unwrap();
             self.connection
                 .client()
-                .connect_network("hyperlane_validator_test_net", ConnectNetworkOptions {
-                    container: id,
-                    ..Default::default()
-                })
+                .connect_network(
+                    "hyperlane_validator_test_net",
+                    ConnectNetworkOptions {
+                        container: id,
+                        ..Default::default()
+                    },
+                )
                 .await?;
         }
 

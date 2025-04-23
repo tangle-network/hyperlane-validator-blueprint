@@ -18,3 +18,7 @@ target/
 tests/
 test_assets/
 dependencies/
+node_modules/
+
+contracts/*
+!contracts/src/*.sol
