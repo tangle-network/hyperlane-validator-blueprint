@@ -54,7 +54,7 @@ color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.44.0"
 reqwest = "0.12.15"
-blueprint-sdk = { version = "0.1.0-alpha.5" }
+blueprint-sdk = { version = "0.1.0-alpha.7" }
 #blueprint-sdk = { path = "../gadget/crates/sdk" }
 docktopus = { version = "0.3.0" }
 bollard = "0.18"
