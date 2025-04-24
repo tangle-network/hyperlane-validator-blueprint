@@ -13,6 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          # (required) GitHub token for creating GitHub Releases.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -27,17 +38,7 @@ jobs:
 
       - name: Verify Forge installation
         run: forge --version
-
-      - uses: taiki-e/create-gh-release-action@v1
-        with:
-          # (required) GitHub token for creating GitHub Releases.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  upload-assets:
-    needs: create-release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
