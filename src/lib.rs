@@ -101,7 +101,9 @@ impl HyperlaneContext {
                 }
             }
 
-            env.push(format!("CONFIG_FILES={}", config_files.join(",")));
+            if !config_files.is_empty() {
+                env.push(format!("CONFIG_FILES={}", config_files.join(",")));
+            }
         }
 
         let origin_chain_name_path = self.origin_chain_name_path();
