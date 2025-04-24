@@ -56,8 +56,3 @@ reqwest = "0.12.15"
 blueprint-sdk = { version = "0.1.0-alpha.7" }
 docktopus = { version = "0.4.0-alpha.1" }
 bollard = "0.18"
-
-# The profile that 'dist' will build with
-[profile.dist]
-inherits = "release"
-lto = "thin"

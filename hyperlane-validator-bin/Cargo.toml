@@ -28,5 +28,5 @@ sources = [
         { arch = "Amd64", os = "Linux", name = "amd64-linux-hyperlane-validator-blueprint-bin" },
         { arch = "Arm64", os = "Linux", name = "arm64-linux-hyperlane-validator-blueprint-bin" }
     ] },
-    { type = "Container", registry = "127.0.0.1:5000", image = "hyperlane-validator-blueprint", tag = "latest" }
+    #{ type = "Container", registry = "127.0.0.1:5000", image = "hyperlane-validator-blueprint", tag = "latest" }
 ]
