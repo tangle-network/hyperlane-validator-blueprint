@@ -22,7 +22,14 @@ color-eyre.workspace = true
 hyperlane-validator-blueprint-lib.workspace = true
 blueprint-sdk = { workspace = true, features = ["tangle", "macros", "build"] }
 
+[[bin]]
+name = "hyperlane-validator-blueprint-bin"
+path = "src/main.rs"
+
 [package.metadata.blueprint]
 sources = [
-    { type = "Container", registry = "127.0.0.1:5000", image = "hyperlane-validator-blueprint", tag = "latest" }
+    { type = "Native", owner = "tangle-network", repo = "hyperlane-validator-blueprint", tag = "0.1.0", binaries = [
+        { arch = "Amd64", os = "Linux", name = "hyperlane-validator-blueprint-bin" },
+    ] },
+    #{ type = "Container", registry = "127.0.0.1:5000", image = "hyperlane-validator-blueprint", tag = "latest" }
 ]

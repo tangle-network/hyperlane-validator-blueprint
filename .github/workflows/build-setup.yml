@@ -1,0 +1,19 @@
+# This file is used to install the Foundry toolchain and verify the installation.
+
+- name: Set up Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: "latest"
+    cache: 'npm'
+
+- name: Install Hyperlane Contracts
+  run: npm install
+
+- name: Install Foundry
+  uses: foundry-rs/foundry-toolchain@v1
+
+- name: Verify Forge installation
+  run: forge --version
+
+- name: Install Solidity Dependencies
+  run: forge soldeer update -d

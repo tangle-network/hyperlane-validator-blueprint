@@ -29,6 +29,7 @@ futures = "0.3.31"
 [workspace]
 resolver = "3"
 members = ["hyperlane-validator-bin", "."]
+default-members = ["hyperlane-validator-bin"]
 
 [workspace.package]
 version = "0.1.0"
@@ -53,6 +54,12 @@ color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.44.0"
 reqwest = "0.12.15"
-blueprint-sdk = { version = "0.1.0-alpha.7" }
-docktopus = { version = "0.4.0-alpha.1" }
+blueprint-sdk = { git = "https://github.com/tangle-network/blueprint", rev = "2555460" }
+#blueprint-sdk = { version = "0.1.0-alpha.8" }
+docktopus = { version = "0.4.0-alpha.2" }
 bollard = "0.18"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

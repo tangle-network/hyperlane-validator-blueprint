@@ -14,7 +14,7 @@ remappings_location = "txt"
 remappings_version = false
 
 [dependencies]
-tnt-core = "0.3.0"
+tnt-core = "0.4.0"
 "@openzeppelin-contracts" = "4.9.3"
 "@openzeppelin-contracts-upgradeable" = "4.9.3"
 
