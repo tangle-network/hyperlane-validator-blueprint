@@ -11,6 +11,7 @@ ci = "github"
 installers = []
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = ["x86_64-unknown-linux-gnu"]
+members = ["cargo:/hyperlane-validator-bin"]
 
 [dist.github-custom-runners]
 global = "ubuntu-latest"
