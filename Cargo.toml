@@ -29,6 +29,7 @@ futures = "0.3.31"
 [workspace]
 resolver = "3"
 members = ["hyperlane-validator-bin", "."]
+default-members = ["hyperlane-validator-bin"]
 
 [workspace.package]
 version = "0.1.0"
