@@ -28,7 +28,7 @@ path = "src/main.rs"
 
 [package.metadata.blueprint]
 sources = [
-    { type = "Native", owner = "tangle-network", repo = "hyperlane-validator-blueprint", tag = "v0.1.1", binaries = [
+    { type = "Native", owner = "tangle-network", repo = "hyperlane-validator-blueprint", tag = "v0.1.2", binaries = [
         { arch = "Amd64", os = "Linux", name = "hyperlane-validator-blueprint-bin" },
     ] },
     #{ type = "Container", registry = "127.0.0.1:5000", image = "hyperlane-validator-blueprint", tag = "latest" }
