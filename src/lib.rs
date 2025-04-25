@@ -152,7 +152,6 @@ impl HyperlaneContext {
     }
 
     async fn revert_configs(&self) -> Result<()> {
-        loop {}
         blueprint_sdk::error!("Container failed to start with new configs, reverting");
 
         self.remove_existing_container().await?;
