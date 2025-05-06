@@ -54,6 +54,6 @@ color-eyre = "0.6"
 hex = "0.4.3"
 tokio = "1.44.0"
 reqwest = "0.12.15"
-blueprint-sdk = { version = "0.1.0-alpha.7" }
+blueprint-sdk = { version = "0.1.0-alpha.8" }
 docktopus = { version = "0.4.0-alpha.1" }
 bollard = "0.18"
