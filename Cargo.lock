@@ -2488,35 +2488,35 @@ dependencies = [
  "alloy-rpc-types-eth",
  "alloy-transport",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-core-testing-utils 0.1.0-alpha.8",
+ "blueprint-std 0.1.0-alpha.2",
  "tokio",
  "url",
 ]
 
 [[package]]
 name = "blueprint-anvil-testing-utils"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-rpc-types-eth",
  "alloy-transport",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-core-testing-utils 0.1.0-alpha.12",
+ "blueprint-std 0.1.0-alpha.3",
  "tokio",
  "url",
 ]
 
 [[package]]
 name = "blueprint-build-utils"
-version = "0.1.0-alpha.2"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.3"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-std 0.1.0-alpha.3",
 ]
 
 [[package]]
@@ -2525,19 +2525,19 @@ version = "0.1.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42f546b7b7f0d2640dfb10479ecb35036d9603eb042774c63d9021559591cb0a"
 dependencies = [
- "blueprint-chain-setup-anvil 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-chain-setup-common 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-chain-setup-tangle 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-chain-setup-anvil 0.1.0-alpha.8",
+ "blueprint-chain-setup-common 0.1.0-alpha.8",
+ "blueprint-chain-setup-tangle 0.1.0-alpha.8",
 ]
 
 [[package]]
 name = "blueprint-chain-setup"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-chain-setup-anvil 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-chain-setup-common 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-chain-setup-tangle 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-chain-setup-anvil 0.1.0-alpha.12",
+ "blueprint-chain-setup-common 0.1.0-alpha.12",
+ "blueprint-chain-setup-tangle 0.1.0-alpha.12",
 ]
 
 [[package]]
@@ -2551,9 +2551,9 @@ dependencies = [
  "alloy-rpc-types",
  "alloy-rpc-types-eth",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-core-testing-utils 0.1.0-alpha.8",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.2",
  "serde",
  "serde_json",
  "tempfile",
@@ -2564,17 +2564,17 @@ dependencies = [
 
 [[package]]
 name = "blueprint-chain-setup-anvil"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-contract",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-rpc-types-eth",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-core-testing-utils 0.1.0-alpha.12",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-std 0.1.0-alpha.3",
  "serde",
  "serde_json",
  "tempfile",
@@ -2590,37 +2590,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3260cf49cf95bb3ae6632795f75f4b49f856088c08422eb19372528198fcd88a"
 dependencies = [
  "alloy-signer-local",
- "blueprint-clients 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-contexts 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-networking 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-clients 0.1.0-alpha.8",
+ "blueprint-contexts 0.1.0-alpha.8",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-networking 0.1.0-alpha.5",
+ "blueprint-std 0.1.0-alpha.2",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
  "color-eyre",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-chain-setup-common"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-signer-local",
- "blueprint-clients 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-contexts 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-clients 0.1.0-alpha.12",
+ "blueprint-contexts 0.1.0-alpha.12",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.8",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
  "color-eyre",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
 ]
 
@@ -2639,16 +2639,16 @@ dependencies = [
  "alloy-signer-local",
  "alloy-sol-types 0.8.25",
  "alloy-transport",
- "blueprint-chain-setup-common 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-clients 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-contexts 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-chain-setup-common 0.1.0-alpha.8",
+ "blueprint-clients 0.1.0-alpha.8",
+ "blueprint-contexts 0.1.0-alpha.8",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-networking 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-networking 0.1.0-alpha.5",
+ "blueprint-std 0.1.0-alpha.2",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
  "cargo_metadata 0.18.1",
  "color-eyre",
  "dialoguer",
@@ -2657,15 +2657,15 @@ dependencies = [
  "reqwest 0.12.15",
  "serde_json",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tracing",
 ]
 
 [[package]]
 name = "blueprint-chain-setup-tangle"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-json-abi",
  "alloy-network",
@@ -2676,16 +2676,16 @@ dependencies = [
  "alloy-signer-local",
  "alloy-sol-types 0.8.25",
  "alloy-transport",
- "blueprint-chain-setup-common 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-clients 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-contexts 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-chain-setup-common 0.1.0-alpha.12",
+ "blueprint-clients 0.1.0-alpha.12",
+ "blueprint-contexts 0.1.0-alpha.12",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.8",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
  "cargo_metadata 0.18.1",
  "color-eyre",
  "dialoguer",
@@ -2694,7 +2694,7 @@ dependencies = [
  "reqwest 0.12.15",
  "serde_json",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "tracing",
 ]
@@ -2706,17 +2706,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fa39e4c5e36f5fc3cccfdf855edb554a1ae307b28211b5f7f5d2d40fcca4a34"
 dependencies = [
  "auto_impl",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-client-core"
-version = "0.1.0-alpha.2"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.3"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "auto_impl",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-std 0.1.0-alpha.3",
  "thiserror 2.0.12",
 ]
 
@@ -2731,11 +2731,11 @@ dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-provider",
  "alloy-transport",
- "blueprint-client-core 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-client-core 0.1.0-alpha.2",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-evm-extra 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-evm-extra 0.1.0-alpha.3",
+ "blueprint-runner 0.1.0-alpha.7",
+ "blueprint-std 0.1.0-alpha.2",
  "eigensdk",
  "num-bigint",
  "thiserror 2.0.12",
@@ -2746,19 +2746,19 @@ dependencies = [
 
 [[package]]
 name = "blueprint-client-eigenlayer"
-version = "0.1.0-alpha.7"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.11"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-contract",
  "alloy-network",
  "alloy-primitives 0.8.25",
  "alloy-provider",
  "alloy-transport",
- "blueprint-client-core 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-evm-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-client-core 0.1.0-alpha.3",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-evm-extra 0.1.0-alpha.4",
+ "blueprint-runner 0.1.0-alpha.11",
+ "blueprint-std 0.1.0-alpha.3",
  "eigensdk",
  "num-bigint",
  "thiserror 2.0.12",
@@ -2783,10 +2783,10 @@ dependencies = [
  "alloy-rpc-types",
  "alloy-rpc-types-eth",
  "alloy-transport",
- "blueprint-client-core 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-client-core 0.1.0-alpha.2",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "blueprint-metrics-rpc-calls 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "serde",
  "serde_json",
@@ -2797,8 +2797,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-client-evm"
-version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.4"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-consensus",
  "alloy-json-rpc",
@@ -2810,10 +2810,10 @@ dependencies = [
  "alloy-rpc-types",
  "alloy-rpc-types-eth",
  "alloy-transport",
- "blueprint-client-core 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-metrics-rpc-calls 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-client-core 0.1.0-alpha.3",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-metrics-rpc-calls 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "serde",
  "serde_json",
@@ -2829,36 +2829,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afc25b8c957a45376ba8da243f2b48245dc9041810e436ed0bc0e9857a76e223"
 dependencies = [
  "auto_impl",
- "blueprint-client-core 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-client-core 0.1.0-alpha.2",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-sp-core 0.1.0-alpha.4",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-runner 0.1.0-alpha.7",
+ "blueprint-std 0.1.0-alpha.2",
  "serde",
  "serde_json",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tokio",
 ]
 
 [[package]]
 name = "blueprint-client-tangle"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "auto_impl",
- "blueprint-client-core 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-client-core 0.1.0-alpha.3",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto-sp-core 0.1.0-alpha.6",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-runner 0.1.0-alpha.11",
+ "blueprint-std 0.1.0-alpha.3",
  "serde",
  "serde_json",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "tokio",
 ]
@@ -2869,24 +2869,24 @@ version = "0.1.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7de905046bca9b693296d2442084b8f4673463e60ae6826e2d0f7f92b5a1eaa6"
 dependencies = [
- "blueprint-client-core 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-client-eigenlayer 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-client-evm 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-client-tangle 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-client-core 0.1.0-alpha.2",
+ "blueprint-client-eigenlayer 0.1.0-alpha.7",
+ "blueprint-client-evm 0.1.0-alpha.3",
+ "blueprint-client-tangle 0.1.0-alpha.8",
+ "blueprint-std 0.1.0-alpha.2",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-clients"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-client-core 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-client-eigenlayer 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-client-evm 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-client-tangle 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-client-core 0.1.0-alpha.3",
+ "blueprint-client-eigenlayer 0.1.0-alpha.11",
+ "blueprint-client-evm 0.1.0-alpha.4",
+ "blueprint-client-tangle 0.1.0-alpha.12",
+ "blueprint-std 0.1.0-alpha.3",
  "thiserror 2.0.12",
 ]
 
@@ -2903,8 +2903,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-context-derive"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2917,25 +2917,25 @@ version = "0.1.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21770d243412de675fe256d3a30139aef747118d13377c0c8c268b1cbfd5fcb2"
 dependencies = [
- "blueprint-clients 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-networking 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "tangle-subxt",
+ "blueprint-clients 0.1.0-alpha.8",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-networking 0.1.0-alpha.5",
+ "blueprint-runner 0.1.0-alpha.7",
+ "blueprint-std 0.1.0-alpha.2",
+ "tangle-subxt 0.16.0",
 ]
 
 [[package]]
 name = "blueprint-contexts"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-clients 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "tangle-subxt",
+ "blueprint-clients 0.1.0-alpha.12",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-runner 0.1.0-alpha.11",
+ "blueprint-std 0.1.0-alpha.3",
+ "tangle-subxt 0.17.0",
 ]
 
 [[package]]
@@ -2956,7 +2956,7 @@ dependencies = [
 [[package]]
 name = "blueprint-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "bytes",
  "futures-util",
@@ -2973,11 +2973,11 @@ version = "0.1.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1fe4b9c8087706401cfe018957e860a446c1b83a9ec97765e2546884eb67e28"
 dependencies = [
- "blueprint-clients 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-clients 0.1.0-alpha.8",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-keystore 0.1.0-alpha.6",
  "blueprint-router 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-runner 0.1.0-alpha.7",
  "cargo_toml",
  "thiserror 2.0.12",
  "tracing",
@@ -2987,14 +2987,14 @@ dependencies = [
 
 [[package]]
 name = "blueprint-core-testing-utils"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-clients 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-clients 0.1.0-alpha.12",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-runner 0.1.0-alpha.11",
  "cargo_toml",
  "thiserror 2.0.12",
  "tracing",
@@ -3008,32 +3008,32 @@ version = "0.1.0-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0040b5843415c0f15465d2444180c456eaf15fdba0cfff3447e7ceb64614de0"
 dependencies = [
- "blueprint-crypto-bls 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-bn254 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-ed25519 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-hashing 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-k256 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-sr25519 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-bls 0.1.0-alpha.4",
+ "blueprint-crypto-bn254 0.1.0-alpha.4",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-crypto-ed25519 0.1.0-alpha.4",
+ "blueprint-crypto-hashing 0.1.0-alpha.3",
+ "blueprint-crypto-k256 0.1.0-alpha.4",
+ "blueprint-crypto-sp-core 0.1.0-alpha.4",
+ "blueprint-crypto-sr25519 0.1.0-alpha.4",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-crypto"
-version = "0.1.0-alpha.5"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.8"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-crypto-bls 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-bn254 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-ed25519 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-hashing 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-k256 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-sr25519 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-bls 0.1.0-alpha.6",
+ "blueprint-crypto-bn254 0.1.0-alpha.6",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-crypto-ed25519 0.1.0-alpha.6",
+ "blueprint-crypto-hashing 0.1.0-alpha.4",
+ "blueprint-crypto-k256 0.1.0-alpha.6",
+ "blueprint-crypto-sp-core 0.1.0-alpha.6",
+ "blueprint-crypto-sr25519 0.1.0-alpha.6",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.8",
  "thiserror 2.0.12",
 ]
 
@@ -3044,8 +3044,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ede6a0f591f128d908e5b548adc5f54240e8b991a3eceb44712b5ed27f714fdd"
 dependencies = [
  "ark-serialize 0.5.0",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "paste",
  "serde",
@@ -3056,12 +3056,12 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-bls"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "ark-serialize 0.5.0",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "paste",
  "serde",
@@ -3080,8 +3080,8 @@ dependencies = [
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "num-bigint",
  "num-traits",
@@ -3093,15 +3093,15 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-bn254"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "ark-bn254",
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "num-bigint",
  "num-traits",
@@ -3117,7 +3117,7 @@ version = "0.1.0-alpha.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f046e79538d10b700a2ed2d726fff6aac8dccc81d47b65731f25f1dd8d65305"
 dependencies = [
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "clap",
  "serde",
  "thiserror 2.0.12",
@@ -3125,10 +3125,10 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-core"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-std 0.1.0-alpha.3",
  "clap",
  "serde",
  "thiserror 2.0.12",
@@ -3140,8 +3140,8 @@ version = "0.1.0-alpha.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b96ae3200504ed046161a2b9bb5263110fcf0278e07bd5a1e188b6ffb6b52ff5"
 dependencies = [
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "ed25519-zebra",
  "hex",
  "serde",
@@ -3151,11 +3151,11 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-ed25519"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "ed25519-zebra",
  "hex",
  "serde",
@@ -3170,18 +3170,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f76e5f2bcd1858130c89d2a9636fcb5a66d09745967b3cbdddcf9fd3b36aade"
 dependencies = [
  "blake3",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "sha2 0.10.9",
  "sha3",
 ]
 
 [[package]]
 name = "blueprint-crypto-hashing"
-version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.4"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "blake3",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-std 0.1.0-alpha.3",
  "sha2 0.10.9",
  "sha3",
 ]
@@ -3194,8 +3194,8 @@ checksum = "8db3106488aae2381c277bfe8f1d5fdba9b537cedb972e97c38bcd4e85893e78"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "k256",
  "serde",
@@ -3205,13 +3205,13 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-k256"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "k256",
  "serde",
@@ -3228,9 +3228,9 @@ dependencies = [
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
- "blueprint-crypto-bls 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-bls 0.1.0-alpha.4",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "paste",
  "serde",
@@ -3242,15 +3242,15 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-sp-core"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
- "blueprint-crypto-bls 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-bls 0.1.0-alpha.6",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "paste",
  "serde",
@@ -3266,8 +3266,8 @@ version = "0.1.0-alpha.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e623dab6d07152c60cef8b83984f1e24f8da5e812c0813782715194ef9089d12"
 dependencies = [
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "hex",
  "schnorrkel",
  "serde",
@@ -3277,11 +3277,11 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-sr25519"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "hex",
  "schnorrkel",
  "serde",
@@ -3297,32 +3297,32 @@ checksum = "7fb7276cfa247ec252b521df2b37a891635a58804f2b11f655957ce7c7575685"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-crypto-sp-core 0.1.0-alpha.4",
+ "blueprint-std 0.1.0-alpha.2",
  "k256",
  "serde",
  "sp-core",
  "sp-runtime",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-crypto-tangle-pair-signer"
-version = "0.1.0-alpha.5"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.8"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-sp-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-crypto-sp-core 0.1.0-alpha.6",
+ "blueprint-std 0.1.0-alpha.3",
  "k256",
  "serde",
  "sp-core",
  "sp-runtime",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
 ]
 
@@ -3340,8 +3340,8 @@ dependencies = [
  "alloy-sol-types 0.8.25",
  "alloy-transport",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-bn254 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-evm-extra 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto-bn254 0.1.0-alpha.4",
+ "blueprint-evm-extra 0.1.0-alpha.3",
  "eigensdk",
  "jsonrpc-core",
  "jsonrpc-http-server",
@@ -3357,8 +3357,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-eigenlayer-extra"
-version = "0.1.0-alpha.4"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.6"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-contract",
  "alloy-network",
@@ -3367,9 +3367,9 @@ dependencies = [
  "alloy-rpc-client",
  "alloy-sol-types 0.8.25",
  "alloy-transport",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-bn254 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-evm-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto-bn254 0.1.0-alpha.6",
+ "blueprint-evm-extra 0.1.0-alpha.4",
  "eigensdk",
  "jsonrpc-core",
  "jsonrpc-http-server",
@@ -3402,7 +3402,7 @@ dependencies = [
  "alloy-transport-http",
  "async-stream",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "bytes",
  "document-features",
  "futures",
@@ -3417,8 +3417,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-evm-extra"
-version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.4"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-consensus",
  "alloy-network",
@@ -3432,8 +3432,8 @@ dependencies = [
  "alloy-transport",
  "alloy-transport-http",
  "async-stream",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-std 0.1.0-alpha.3",
  "bytes",
  "document-features",
  "futures",
@@ -3461,8 +3461,8 @@ dependencies = [
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
  "blake3",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-std 0.1.0-alpha.2",
  "ed25519-zebra",
  "eigensdk",
  "hex",
@@ -3482,7 +3482,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-keystore",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tnt-bls",
  "tokio",
@@ -3491,8 +3491,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-keystore"
-version = "0.1.0-alpha.6"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-network",
  "alloy-primitives 0.8.25",
@@ -3503,8 +3503,8 @@ dependencies = [
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
  "blake3",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-std 0.1.0-alpha.3",
  "ed25519-zebra",
  "eigensdk",
  "hex",
@@ -3524,7 +3524,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-keystore",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "tnt-bls",
  "tokio",
@@ -3545,13 +3545,29 @@ dependencies = [
 
 [[package]]
 name = "blueprint-macros"
-version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.4"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "proc-macro2",
  "quote",
  "serde_json",
  "syn 2.0.101",
+]
+
+[[package]]
+name = "blueprint-manager-bridge"
+version = "0.1.0-alpha.1"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
+dependencies = [
+ "prost",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-stream",
+ "tokio-vsock",
+ "tonic",
+ "tonic-build",
+ "tower 0.5.2",
+ "uuid 1.16.0",
 ]
 
 [[package]]
@@ -3566,7 +3582,7 @@ dependencies = [
 [[package]]
 name = "blueprint-metrics-rpc-calls"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "metrics",
 ]
@@ -3580,8 +3596,8 @@ dependencies = [
  "alloy-primitives 0.8.25",
  "bincode",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-std 0.1.0-alpha.2",
  "crossbeam-channel",
  "dashmap",
  "futures",
@@ -3599,14 +3615,14 @@ dependencies = [
 
 [[package]]
 name = "blueprint-networking"
-version = "0.1.0-alpha.5"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-primitives 0.8.25",
  "bincode",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-std 0.1.0-alpha.3",
  "crossbeam-channel",
  "dashmap",
  "futures",
@@ -3631,12 +3647,12 @@ dependencies = [
  "anyhow",
  "bincode",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-core 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-networking 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-crypto-core 0.1.0-alpha.4",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-networking 0.1.0-alpha.5",
+ "blueprint-std 0.1.0-alpha.2",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
  "chrono",
  "clap",
  "crossbeam-channel",
@@ -3658,7 +3674,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sysinfo",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "time",
  "tiny-keccak",
@@ -3673,18 +3689,18 @@ dependencies = [
 
 [[package]]
 name = "blueprint-pricing-engine"
-version = "0.1.1"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.5"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "anyhow",
  "bincode",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-core 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-crypto-core 0.1.0-alpha.6",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
  "chrono",
  "clap",
  "crossbeam-channel",
@@ -3698,6 +3714,7 @@ dependencies = [
  "parity-scale-codec",
  "prost",
  "rand 0.8.5",
+ "rust_decimal",
  "scale-info",
  "serde",
  "serde_json",
@@ -3706,7 +3723,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sysinfo",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "time",
  "tiny-keccak",
@@ -3733,9 +3750,9 @@ dependencies = [
 [[package]]
 name = "blueprint-producers-extra"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
  "document-features",
  "futures",
 ]
@@ -3758,9 +3775,9 @@ dependencies = [
 [[package]]
 name = "blueprint-router"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
  "bytes",
  "document-features",
  "futures",
@@ -3780,13 +3797,13 @@ dependencies = [
  "alloy-signer",
  "alloy-signer-local",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-evm-extra 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-networking 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-evm-extra 0.1.0-alpha.3",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-networking 0.1.0-alpha.5",
  "blueprint-router 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
  "clap",
  "crossbeam-channel",
  "document-features",
@@ -3799,7 +3816,7 @@ dependencies = [
  "libp2p",
  "sc-keystore",
  "serde",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tokio",
  "tower 0.5.2",
@@ -3809,21 +3826,22 @@ dependencies = [
 
 [[package]]
 name = "blueprint-runner"
-version = "0.1.0-alpha.7"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.11"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-contract",
  "alloy-primitives 0.8.25",
  "alloy-signer",
  "alloy-signer-local",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-evm-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-evm-extra 0.1.0-alpha.4",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-manager-bridge",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
  "clap",
  "crossbeam-channel",
  "document-features",
@@ -3836,7 +3854,7 @@ dependencies = [
  "libp2p",
  "sc-keystore",
  "serde",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "tokio",
  "tower 0.5.2",
@@ -3852,58 +3870,58 @@ checksum = "3304793717c869c5318b7f860cd2bbb4a2e431b3cac632c5aabb3da4861c991e"
 dependencies = [
  "alloy",
  "alloy-json-abi",
- "blueprint-chain-setup 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-clients 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-context-derive 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-contexts 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-chain-setup 0.1.0-alpha.8",
+ "blueprint-clients 0.1.0-alpha.8",
+ "blueprint-context-derive 0.1.0-alpha.4",
+ "blueprint-contexts 0.1.0-alpha.8",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-eigenlayer-extra 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-evm-extra 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-macros 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-crypto 0.1.0-alpha.5",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5",
+ "blueprint-eigenlayer-extra 0.1.0-alpha.4",
+ "blueprint-evm-extra 0.1.0-alpha.3",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-macros 0.1.0-alpha.3",
  "blueprint-producers-extra 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "blueprint-router 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-runner 0.1.0-alpha.7",
+ "blueprint-std 0.1.0-alpha.2",
  "blueprint-stores",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
+ "blueprint-testing-utils 0.1.0-alpha.8",
  "document-features",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tokio",
 ]
 
 [[package]]
 name = "blueprint-sdk"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy",
  "alloy-json-abi",
  "blueprint-build-utils",
- "blueprint-chain-setup 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-clients 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-context-derive 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-contexts 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-eigenlayer-extra 0.1.0-alpha.4 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-evm-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-macros 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-networking 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-producers-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-chain-setup 0.1.0-alpha.12",
+ "blueprint-clients 0.1.0-alpha.12",
+ "blueprint-context-derive 0.1.0-alpha.6",
+ "blueprint-contexts 0.1.0-alpha.12",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-crypto 0.1.0-alpha.8",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.8",
+ "blueprint-eigenlayer-extra 0.1.0-alpha.6",
+ "blueprint-evm-extra 0.1.0-alpha.4",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-macros 0.1.0-alpha.4",
+ "blueprint-networking 0.1.0-alpha.9",
+ "blueprint-producers-extra 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-router 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-runner 0.1.0-alpha.11",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
+ "blueprint-testing-utils 0.1.0-alpha.12",
  "document-features",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "tempfile",
  "thiserror 2.0.12",
  "tokio",
@@ -3923,8 +3941,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-std"
-version = "0.1.0-alpha.2"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.3"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "colored",
  "num-traits",
@@ -3938,7 +3956,7 @@ version = "0.1.0-alpha.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2425e75da749293a2804a41b88353885ae2c65b4fff67c36bc11e7f3ee05a27e"
 dependencies = [
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-std 0.1.0-alpha.2",
  "serde",
  "serde_json",
  "thiserror 2.0.12",
@@ -3971,17 +3989,17 @@ dependencies = [
  "pin-project-lite",
  "serde",
  "serde_json",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "thiserror 2.0.12",
  "tower 0.5.2",
 ]
 
 [[package]]
 name = "blueprint-tangle-extra"
-version = "0.1.0-alpha.5"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.7"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
  "bytes",
  "cargo_metadata 0.18.1",
  "cid",
@@ -3991,7 +4009,7 @@ dependencies = [
  "pin-project-lite",
  "serde",
  "serde_json",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "thiserror 2.0.12",
  "tower 0.5.2",
 ]
@@ -4004,20 +4022,20 @@ checksum = "1d4362240f13b5ab5be07bad824462e7d9cd1d46f55d329e5dbec47020c56b7c"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-chain-setup 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-client-tangle 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-contexts 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-chain-setup 0.1.0-alpha.8",
+ "blueprint-client-tangle 0.1.0-alpha.8",
+ "blueprint-contexts 0.1.0-alpha.8",
  "blueprint-core 0.1.0-alpha.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-keystore 0.1.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-pricing-engine 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-runner 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-std 0.1.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-core-testing-utils 0.1.0-alpha.8",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5",
+ "blueprint-keystore 0.1.0-alpha.6",
+ "blueprint-pricing-engine 0.1.1",
+ "blueprint-runner 0.1.0-alpha.7",
+ "blueprint-std 0.1.0-alpha.2",
+ "blueprint-tangle-extra 0.1.0-alpha.5",
  "futures",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.16.0",
  "tempfile",
  "tnt-core-bytecode",
  "tokio",
@@ -4027,25 +4045,25 @@ dependencies = [
 
 [[package]]
 name = "blueprint-tangle-testing-utils"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local",
- "blueprint-chain-setup 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-client-tangle 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-contexts 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-keystore 0.1.0-alpha.6 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-pricing-engine 0.1.1 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-runner 0.1.0-alpha.7 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-std 0.1.0-alpha.2 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-extra 0.1.0-alpha.5 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-chain-setup 0.1.0-alpha.12",
+ "blueprint-client-tangle 0.1.0-alpha.12",
+ "blueprint-contexts 0.1.0-alpha.12",
+ "blueprint-core 0.1.0-alpha.3 (git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication)",
+ "blueprint-core-testing-utils 0.1.0-alpha.12",
+ "blueprint-crypto-tangle-pair-signer 0.1.0-alpha.8",
+ "blueprint-keystore 0.1.0-alpha.9",
+ "blueprint-pricing-engine 0.1.5",
+ "blueprint-runner 0.1.0-alpha.11",
+ "blueprint-std 0.1.0-alpha.3",
+ "blueprint-tangle-extra 0.1.0-alpha.7",
  "futures",
  "sp-core",
- "tangle-subxt",
+ "tangle-subxt 0.17.0",
  "tempfile",
  "tnt-core-bytecode",
  "tokio",
@@ -4059,19 +4077,19 @@ version = "0.1.0-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b3a6b7f902fa22dbfd5f44c2f51b6d4592492f3463eb430e64a22c5013b9ef10"
 dependencies = [
- "blueprint-anvil-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "blueprint-tangle-testing-utils 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-anvil-testing-utils 0.1.0-alpha.8",
+ "blueprint-core-testing-utils 0.1.0-alpha.8",
+ "blueprint-tangle-testing-utils 0.1.0-alpha.8",
 ]
 
 [[package]]
 name = "blueprint-testing-utils"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tangle-network/blueprint?rev=2555460#255546035c447470a0232b294891be82209c3ae5"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tangle-network/blueprint?branch=serial%2Fcommunication#15e5eb5d43d24096ed1ce99a100b200c64b8aa5a"
 dependencies = [
- "blueprint-anvil-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-core-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
- "blueprint-tangle-testing-utils 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-anvil-testing-utils 0.1.0-alpha.12",
+ "blueprint-core-testing-utils 0.1.0-alpha.12",
+ "blueprint-tangle-testing-utils 0.1.0-alpha.12",
 ]
 
 [[package]]
@@ -4710,9 +4728,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.37"
+version = "4.5.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eccb054f56cbd38340b380d4a8e69ef1f02f1af43db2f0cc817a4774d80ae071"
+checksum = "ed93b9805f8ba930df42c2590f05453d5ec36cbb85d018868a5b24d31f6ac000"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -4720,9 +4738,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.37"
+version = "4.5.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "efd9466fac8543255d3b1fcad4762c5e116ffe808c8a3043d4263cd4fd4862a2"
+checksum = "379026ff283facf611b0ea629334361c4211d1b12ee01024eec1591133b04120"
 dependencies = [
  "anstream",
  "anstyle",
@@ -8275,7 +8293,7 @@ name = "hyperlane-relayer-blueprint-lib"
 version = "0.1.0"
 source = "git+https://github.com/tangle-network/hyperlane-relayer-blueprint.git#cb542a88ed1244c368d6773416c2020efcf823bf"
 dependencies = [
- "blueprint-sdk 0.1.0-alpha.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "blueprint-sdk 0.1.0-alpha.8",
  "color-eyre",
  "docktopus",
  "reqwest 0.12.15",
@@ -8285,7 +8303,7 @@ dependencies = [
 name = "hyperlane-validator-blueprint-bin"
 version = "0.1.0"
 dependencies = [
- "blueprint-sdk 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-sdk 0.1.0-alpha.12",
  "color-eyre",
  "hyperlane-validator-blueprint-lib",
  "tokio",
@@ -8296,7 +8314,7 @@ dependencies = [
 name = "hyperlane-validator-blueprint-lib"
 version = "0.1.0"
 dependencies = [
- "blueprint-sdk 0.1.0-alpha.8 (git+https://github.com/tangle-network/blueprint?rev=2555460)",
+ "blueprint-sdk 0.1.0-alpha.12",
  "bollard",
  "color-eyre",
  "docktopus",
@@ -9961,6 +9979,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "memoffset"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
 name = "memory-db"
 version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10250,6 +10277,19 @@ dependencies = [
  "bitflags 1.3.2",
  "cfg-if 1.0.0",
  "libc",
+]
+
+[[package]]
+name = "nix"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
+dependencies = [
+ "bitflags 2.9.0",
+ "cfg-if 1.0.0",
+ "cfg_aliases",
+ "libc",
+ "memoffset 0.9.1",
 ]
 
 [[package]]
@@ -14436,7 +14476,7 @@ dependencies = [
  "netlink-packet-utils",
  "netlink-proto",
  "netlink-sys",
- "nix",
+ "nix 0.26.4",
  "thiserror 1.0.69",
  "tokio",
 ]
@@ -14500,6 +14540,17 @@ dependencies = [
  "thiserror 1.0.69",
  "unicode-normalization",
  "uuid 0.8.2",
+]
+
+[[package]]
+name = "rust_decimal"
+version = "1.37.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "faa7de2ba56ac291bd90c6b9bece784a52ae1411f9506544b3eae36dd2356d50"
+dependencies = [
+ "arrayvec 0.7.6",
+ "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -17528,6 +17579,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tangle-subxt"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70808ede5e0d819cf40787c3aeecc88fbf7bd8cea7e335c005dba9f2a0d388a8"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "subxt",
+ "subxt-core",
+ "subxt-signer",
+]
+
+[[package]]
 name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17938,6 +18003,19 @@ dependencies = [
  "futures-sink",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "tokio-vsock"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1824fc0300433f400df6b6264a9ab00ba93f39d38c3157fb5f05183476c4af10"
+dependencies = [
+ "bytes",
+ "futures",
+ "libc",
+ "tokio",
+ "vsock",
 ]
 
 [[package]]
@@ -18480,6 +18558,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c3082ca00d5a5ef149bb8b555a72ae84c9c59f7250f013ac822ac2e49b19c64"
 
 [[package]]
+name = "vsock"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e8b4d00e672f147fc86a09738fadb1445bd1c0a40542378dfb82909deeee688"
+dependencies = [
+ "libc",
+ "nix 0.29.0",
+]
+
+[[package]]
 name = "w3f-bls"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18896,7 +18984,7 @@ dependencies = [
  "log",
  "mach",
  "memfd",
- "memoffset",
+ "memoffset 0.8.0",
  "paste",
  "rand 0.8.5",
  "rustix 0.36.17",

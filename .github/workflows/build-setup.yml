@@ -17,3 +17,8 @@
 
 - name: Install Solidity Dependencies
   run: forge soldeer update -d
+
+- name: Install build dependencies
+  run: |
+    sudo apt-get -y install protobuf-compiler musl-tools perl make cmake pkg-config
+    echo "OPENSSL_STATIC=1" >> "$GITHUB_ENV"
