@@ -140,6 +140,8 @@ jobs:
         run: "forge --version"
       - name: "Install Solidity Dependencies"
         run: "forge soldeer update -d"
+      - name: "Install build dependencies"
+        run: "sudo apt-get install -y protobuf-compiler"
       - name: Install dist
         run: ${{ matrix.install_dist.run }}
       # Get the dist-manifest

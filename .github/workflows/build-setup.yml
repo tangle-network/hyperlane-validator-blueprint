@@ -17,3 +17,6 @@
 
 - name: Install Solidity Dependencies
   run: forge soldeer update -d
+
+- name: Install build dependencies
+  run: sudo apt-get install -y protobuf-compiler
