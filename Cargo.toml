@@ -22,7 +22,7 @@ docktopus = { workspace = true, features = ["deploy"] }
 [dev-dependencies]
 blueprint-sdk = { workspace = true, features = ["testing", "evm"] }
 hyperlane-relayer-blueprint-lib.workspace = true
-testcontainers = "0.23.1"
+testcontainers = "0.24.0"
 futures = "0.3.31"
 
 [workspace]
