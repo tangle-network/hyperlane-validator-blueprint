@@ -18,14 +18,9 @@ async fn main() -> color_eyre::Result<()> {
 
     let env = BlueprintEnvironment::load()?;
 
-    let data_dir = env.data_dir.clone().unwrap_or_else(|| {
-        sdk::warn!("Data dir not specified, using default");
-        blueprint::default_data_dir()
-    });
-
-    if !data_dir.exists() {
+    if !env.data_dir.exists() {
         sdk::warn!("Data dir does not exist, creating");
-        std::fs::create_dir_all(&data_dir)?;
+        std::fs::create_dir_all(&env.data_dir)?;
     }
 
     // Signer
@@ -41,7 +36,7 @@ async fn main() -> color_eyre::Result<()> {
     // Consumer
     let tangle_consumer = TangleConsumer::new(tangle_client.rpc_client.clone(), sr25519_signer);
 
-    let context = blueprint::HyperlaneContext::new(env.clone(), data_dir).await?;
+    let context = blueprint::HyperlaneContext::new(env.clone(), env.data_dir.clone()).await?;
 
     sdk::info!("Starting the event watcher ...");
 

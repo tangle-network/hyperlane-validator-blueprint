@@ -18,7 +18,6 @@ tokio.workspace = true
 hex.workspace = true
 reqwest.workspace = true
 docktopus = { workspace = true, features = ["deploy"] }
-bollard.workspace = true
 
 [dev-dependencies]
 blueprint-sdk = { workspace = true, features = ["testing", "evm"] }
@@ -32,7 +31,7 @@ members = ["hyperlane-validator-bin", "."]
 default-members = ["hyperlane-validator-bin"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "A Tangle Blueprint (AVS) for deploying Hyperlane validators"
 authors = ["Serial <69764315+Serial-ATA@users.noreply.github.com>"]
@@ -57,7 +56,6 @@ reqwest = "0.12.15"
 blueprint-sdk = { git = "https://github.com/tangle-network/blueprint", branch = "serial/communication" }
 #blueprint-sdk = { version = "0.1.0-alpha.8" }
 docktopus = { version = "0.4.0-alpha.2" }
-bollard = "0.18"
 
 # The profile that 'dist' will build with
 [profile.dist]

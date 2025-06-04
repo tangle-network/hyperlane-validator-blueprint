@@ -1,10 +1,12 @@
 use blueprint_sdk as sdk;
-use bollard::container::RemoveContainerOptions;
-use bollard::models::EndpointSettings;
-use bollard::network::{ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions};
 use color_eyre::Report;
 use color_eyre::Result;
 use docktopus::DockerBuilder;
+use docktopus::bollard::container::RemoveContainerOptions;
+use docktopus::bollard::models::EndpointSettings;
+use docktopus::bollard::network::{
+    ConnectNetworkOptions, CreateNetworkOptions, InspectNetworkOptions,
+};
 use futures::StreamExt;
 use hyperlane_validator_blueprint_lib as blueprint;
 use sdk::Job;
@@ -142,18 +144,24 @@ async fn spinup_anvil_testnets() -> Result<(Testnet, Testnet)> {
 
         connection
             .client()
-            .connect_network(network, ConnectNetworkOptions {
-                container: origin.id(),
-                ..Default::default()
-            })
+            .connect_network(
+                network,
+                ConnectNetworkOptions {
+                    container: origin.id(),
+                    ..Default::default()
+                },
+            )
             .await?;
 
         connection
             .client()
-            .connect_network(network, ConnectNetworkOptions {
-                container: dest.id(),
-                ..Default::default()
-            })
+            .connect_network(
+                network,
+                ConnectNetworkOptions {
+                    container: dest.id(),
+                    ..Default::default()
+                },
+            )
             .await?;
 
         let origin_container_inspect = connection

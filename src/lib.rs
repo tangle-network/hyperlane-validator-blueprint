@@ -1,8 +1,8 @@
 use blueprint_sdk as sdk;
-use bollard::network::ConnectNetworkOptions;
 use color_eyre::Result;
 use color_eyre::eyre::eyre;
 use docktopus::DockerBuilder;
+use docktopus::bollard::network::ConnectNetworkOptions;
 use docktopus::container::Container;
 use sdk::crypto::sp_core::SpEcdsa;
 use sdk::crypto::tangle_pair_signer::TanglePairSigner;
